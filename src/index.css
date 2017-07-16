@@ -1,0 +1,11 @@
+/* Bootstrap modifiers */
+body {
+  background: #eee;
+}
+h2 {
+  font-size: 26px;
+}
+.table>tbody>tr>td, 
+.table>tbody>tr>th {
+  padding: 6px 12px;
+}

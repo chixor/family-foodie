@@ -1,0 +1,275 @@
+/* MENUFRESH */
+.navbar {
+  border-radius: 0px;
+}
+.navbar-brand img {
+  width:20px;
+  display: inline;
+  margin-top: -4px;
+  margin-right: 3px;
+}
+.navbar-inverse .navbar-nav>li>a.active {
+  background: black;
+  font-weight: bold;
+  color: white;
+}
+
+.weeklist {
+  border: 5px solid #eee;
+}
+.weeklist input[type="search"] {
+  width: calc(100% - 12pt);
+  margin: 0 6pt;
+}
+.weeklist .icon-addon.addon-md .glyphicon {
+  margin-left: 3pt;
+}
+.weeklist.unsaved {
+  border: 5px dashed rgba(0,0,0,0.1);
+}
+.corner-triangle-left, .corner-triangle-right {
+  cursor: pointer;
+  display: block;
+  width: 90px;
+  height: 90px;
+  border-style: solid;
+  border-width: 0 0 90px 90px;
+  border-color: transparent transparent transparent #222;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 99999;
+  color: white;
+}
+.corner-triangle-left .corner-triangle-text, .corner-triangle-right .corner-triangle-text {
+  position: relative;
+  top: 60px;
+  left: -90px;
+  transform: rotate(-45deg);
+}
+.corner-triangle-left .glyphicon, .corner-triangle-right .glyphicon {
+  position: absolute;
+  top: 15px;
+  left: -75px;
+  font-size: 180%;
+}
+.corner-triangle-right .glyphicon {
+  left: auto;
+  right: -75px;
+}
+.corner-triangle-right {
+  border-width: 0 90px 90px 0;
+  border-color: transparent #222 transparent transparent;
+  left: auto;
+  right: 0;
+}
+.corner-triangle-right .corner-triangle-text {
+  left: auto;
+  right: -50px;
+  top: 20px;
+  transform: rotate(45deg);
+}
+
+
+.recipe-search {
+  padding: 0;
+}
+.recipe-search .search-results {
+  background-color: white;
+  position: absolute;
+  top: 33px;
+  padding: 0;
+  border-top: 1px solid silver;
+  margin: 0 6pt;
+  width: calc(100% - 12pt);
+  max-height: 300px;
+  overflow: scroll;
+  border-bottom: 1px solid silver;
+}
+.recipe-search .search-results li {
+  list-style: none;
+  margin: 0;
+  border: 1px solid silver;
+  margin-top: -1px;
+  margin-bottom: -1px;
+}
+.recipe-search .search-results li:hover {
+  background-color: #eee;
+}
+.recipe-search .search-results img {
+  height: 56px;
+  float: left;
+  padding-right: 6pt;
+}
+.recipe-search .search-results span {
+  padding: 6pt;
+  height: 56px;
+  display: block;
+}
+
+.recipelist article, .recipedetail {
+    border-radius: 4pt;
+    background: white;
+    overflow: hidden;
+    box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.2), 0 1px 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+.recipelist article {
+    display: inline-block;
+    position: relative;
+    margin: 6pt;
+    width: calc(33% - 12pt);
+    max-width: 310px;
+    box-sizing: border-box;
+    height: 370px;
+}
+
+.recipedetail {
+    padding: 0 18px 10pt 18pt;
+}
+
+.recipelist article a {
+  color: black;
+  text-decoration: none;
+}
+
+.recipelist article .heroimage {
+  background: transparent no-repeat center 7%;
+  background-size: 109% auto;
+  width: 100%;
+  height: 270px;
+}
+
+.recipelist article h3 {
+  padding: 6pt;
+  margin: 0;
+  height: 58px;
+  font-size: 140%;
+}
+
+.recipelist article p {
+  padding: 6pt;
+  margin: 0;
+}
+
+.recipelist article button {
+  float: right;
+}
+
+.recipelist article.recipeadd {
+  border: 5px dashed rgba(0,0,0,0.1);
+  background-color: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  position: relative;
+  cursor: pointer;
+}
+.recipelist article.recipeadd:before {
+  content: '+';
+  color: rgba(0,0,0,0.1);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 80px;
+  font-weight: bold;
+  line-height: 1;
+  margin-left: -24px;
+  margin-top: -40px;
+}
+
+.recipe-detail-card {
+  width: 50%;
+}
+
+.recipe-cost-field {
+    width: 60px;
+    float: right;
+    margin-right: 6px;
+    position: relative;
+}
+.recipe-cost-field:before {
+    content: "$";
+    float: left;
+    position: absolute;
+    left: -13px;
+    top: 7px;
+}
+
+.input-group .icon-addon .form-control {
+    border-radius: 0;
+}
+
+.icon-addon {
+    position: relative;
+    color: #555;
+    display: block;
+}
+
+.icon-addon:after,
+.icon-addon:before {
+    display: table;
+    content: " ";
+}
+
+.icon-addon:after {
+    clear: both;
+}
+
+.icon-addon.addon-md .glyphicon,
+.icon-addon .glyphicon, 
+.icon-addon.addon-md .fa,
+.icon-addon .fa {
+    position: absolute;
+    z-index: 2;
+    left: 10px;
+    font-size: 14px;
+    width: 20px;
+    margin-left: -2.5px;
+    text-align: center;
+    padding: 10px 0;
+    top: 1px
+}
+
+.icon-addon.addon-lg .form-control {
+    line-height: 1.33;
+    height: 46px;
+    font-size: 18px;
+    padding: 10px 16px 10px 40px;
+}
+
+.icon-addon.addon-sm .form-control {
+    height: 30px;
+    padding: 5px 10px 5px 28px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.icon-addon.addon-lg .fa,
+.icon-addon.addon-lg .glyphicon {
+    font-size: 18px;
+    margin-left: 0;
+    left: 11px;
+    top: 4px;
+}
+
+.icon-addon.addon-md .form-control,
+.icon-addon .form-control {
+    padding-left: 30px;
+    float: left;
+    font-weight: normal;
+}
+
+.icon-addon.addon-sm .fa,
+.icon-addon.addon-sm .glyphicon {
+    margin-left: 0;
+    font-size: 12px;
+    left: 5px;
+    top: -1px
+}
+
+.icon-addon .form-control:focus + .glyphicon,
+.icon-addon:hover .glyphicon,
+.icon-addon .form-control:focus + .fa,
+.icon-addon:hover .fa {
+    color: #2580db;
+}
