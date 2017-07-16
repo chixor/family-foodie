@@ -48,7 +48,7 @@ export default class Recipes extends React.Component {
         this.setState(prevState => {
           this.refs.searchQuery.value = getParameterByName('s',this.props.location.search);
           prevState.allRecipes = recipes;
-          prevState.showRecipes = this.search(this.refs.searchQuery.value);
+          prevState.showRecipes = this.search(this.refs.searchQuery.value,recipes);
           return prevState;
         });
       });
@@ -64,16 +64,17 @@ export default class Recipes extends React.Component {
     });
   }
 
-  search(value = '') {
+  search(value = '',list) {
+    var recipes = list ? list : this.state.allRecipes;
     if(value.length > 0) {
-      var split = value.trim().split(/[,]+/);
+      var split = value.split(/[, ]+/);
       var query = new RegExp(split.join('|'),'i');
 
-      return this.state.allRecipes.filter(recipe => {
+      return recipes.filter(recipe => {
         return recipe.name.search(query) > -1 || (recipe.description != null && recipe.description.search(query) > -1) || (recipe.ingredients != null && recipe.ingredients.search(query) > -1);
       });
     }
-    return this.state.allRecipes;
+    return recipes;
   }
 
   render() {
