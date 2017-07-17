@@ -1,8 +1,10 @@
 import axios from 'axios';
+import {NotificationManager} from 'react-notifications';
 var BASEURL = 'http://192.168.1.20:8000/api';
 
 function handleError (error) {
   console.warn(error);
+  NotificationManager.error(`${error.response.config.url}`, `${error.response.status}: ${error.response.statusText}`,100000);
   return null;
 }
 
@@ -34,6 +36,7 @@ export default {
   saveRecipeIngredients: function (id,ingredients) {
     return axios.put(`${BASEURL}/recipe/${id}/ingredients/`,{ data: { ingredients: ingredients } })
       .then(function (response) {
+        NotificationManager.success('Recipe ingredients saved successfully');
         return response.data.result;
       })
       .catch(handleError);
@@ -42,6 +45,7 @@ export default {
   deleteRecipeIngredients: function (id) {
     return axios.put(`${BASEURL}/recipe/${id}/ingredients/`)
       .then(function (response) {
+        NotificationManager.success('Recipe ingredients deleted successfully');
         return response.data.result;
       })
       .catch(handleError);
@@ -77,6 +81,7 @@ export default {
     });
     return axios.put(`${BASEURL}/week/${week.year}/${week.week}/`,{ data: { recipes: recipe_ids } })
       .then(function (response) {
+        NotificationManager.success(`Saved week ${week.week}, ${week.year}`);
         return response.data.result;
       })
       .catch(handleError);
@@ -85,6 +90,7 @@ export default {
   deleteWeek: function (week) {
     return axios.delete(`${BASEURL}/week/${week.year}/${week.week}/`)
       .then(function (response) {
+        NotificationManager.success(`Deleted week ${week.week}, ${week.year}`);
         return response.data.result;
       })
       .catch(handleError);

@@ -1,13 +1,39 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { NotificationManager } from 'react-notifications';
 import GoogleLogin from 'react-google-login';
-
-const responseGoogle = (response) => {
-    console.log(response);
-}
+import Auth from '../modules/Auth';
 
 export default class Nav extends React.Component {
+    login(response) {
+        console.log(response);
+        typeof response.error !== 'undefined' ?
+            NotificationManager.error(response.error):
+            Auth.authenticateUser(response.tokenObj,response.profileObj);
+
+        this.setState(prevState => {
+            return prevState.isAuthenticated = true;
+        });
+    }
+
+    logout() {
+        Auth.deauthenticateUser();
+        this.setState(prevState => {
+            return prevState.isAuthenticated = false;
+        });
+    }
+
     render() {
+        var auth = Auth.isUserAuthenticated() ?
+            <div onClick={() => this.logout()}><img title={Auth.getUserName()+' - logout'} className="user-icon" alt="user" src={Auth.getUserImg()}/></div>:
+            <GoogleLogin
+                className="btn btn-success navbar-btn"
+                clientId="658977310896-knrl3gka66fldh83dao2rhgbblmd4un9.apps.googleusercontent.com"
+                buttonText="Login"
+                onSuccess={(res) => this.login(res)}
+                onFailure={(res) => this.login(res)}
+            />
+
         return (
             <div>
                 <nav className="navbar navbar-inverse">
@@ -32,13 +58,7 @@ export default class Nav extends React.Component {
                                 <li><NavLink activeClassName='active' to="/recipes">All recipes</NavLink></li>
                             </ul>
                             <div className="nav navbar-nav navbar-right">
-                                <GoogleLogin
-                                    className="btn btn-success navbar-btn"
-                                    clientId="658977310896-knrl3gka66fldh83dao2rhgbblmd4un9.apps.googleusercontent.com"
-                                    buttonText="Login"
-                                    onSuccess={responseGoogle}
-                                    onFailure={responseGoogle}
-                                />
+                                {auth}
                             </div>
                             <ul className="nav navbar-nav navbar-right">
                                 <li><a target="_blank" href="http://seasonalfoodguide.com/melbourne-victoria-seasonal-fresh-produce-guide-fruits-vegetables-in-season-availability-australia.html">Melbourne Seasonal Food Guide</a></li>

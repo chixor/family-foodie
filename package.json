@@ -4,15 +4,19 @@
   "private": true,
   "dependencies": {
     "axios": "^0.16.2",
+    "node-sass-chokidar": "0.0.3",
     "prop-types": "^15.5.10",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-google-login": "^2.9.2",
+    "react-notifications": "^1.4.3",
     "react-router-dom": "^4.1.1",
     "react-scripts": "0.9.5"
   },
   "devDependencies": {},
   "scripts": {
+    "build-css": "node-sass-chokidar src/ -o src/",
+    "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",

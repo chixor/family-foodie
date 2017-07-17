@@ -1,5 +1,5 @@
 import React from "react";
-import api from '../utils/api';
+import api from '../modules/api';
 
 export default class RecipeDetails extends React.Component {
     constructor(props) {

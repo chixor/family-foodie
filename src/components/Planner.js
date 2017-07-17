@@ -1,8 +1,9 @@
 import React from 'react';
-import api from '../utils/api';
-import MenuDate from '../utils/MenuDate';
-import search from '../utils/search';
+import api from '../modules/api';
+import MenuDate from '../modules/MenuDate';
+import search from '../modules/search';
 import Recipe from './Recipe';
+import Auth from '../modules/Auth';
 
 export default class Planner extends React.Component {
     constructor(props) {

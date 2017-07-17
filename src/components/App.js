@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { NotificationContainer } from 'react-notifications';
+import 'react-notifications/lib/notifications.css';
 import './App.css';
 import Nav from './Nav';
 import Shopping from './Shopping';
@@ -12,6 +14,7 @@ export default class App extends React.Component {
         return (
             <BrowserRouter>
                 <div>
+                    <NotificationContainer/>
                     <Nav />
                     <div className="container-fluid">
                         <Switch>

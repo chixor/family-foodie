@@ -1,6 +1,6 @@
 import React from 'react';
-import api from '../utils/api';
-import MenuDate from '../utils/MenuDate';
+import api from '../modules/api';
+import MenuDate from '../modules/MenuDate';
 
 export default class Shopping extends React.Component {
     constructor(props) {
@@ -13,11 +13,7 @@ export default class Shopping extends React.Component {
     }
 
     componentDidMount() {
-        this.getShopping({week: this.firstDay.getDateWeek(), year: this.firstDay.getFullYear()});
-    }
-
-    getShopping(week) {
-        api.shoppingListWeek(week).then((ingredients) => {
+        api.shoppingListWeek({week: this.firstDay.getDateWeek(), year: this.firstDay.getFullYear()}).then((ingredients) => {
             this.setState(prevState => {
                 var ingredientsList = {};
                 ingredientsList.fresh = ingredients.filter(ing => {return ing.fresh});

@@ -1,6 +1,6 @@
 import React from "react";
-import api from '../utils/api';
-import search from '../utils/search';
+import api from '../modules/api';
+import search from '../modules/search';
 import Recipe from './Recipe';
 
 export default class Recipes extends React.Component {
