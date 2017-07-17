@@ -1,5 +1,5 @@
 import React from 'react';
-var NavLink = require('react-router-dom').NavLink;
+import { NavLink } from 'react-router-dom';
 
 export default class Recipe extends React.Component {
 

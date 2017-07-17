@@ -1,13 +1,14 @@
-var axios = require('axios');
+import axios from 'axios';
+var BASEURL = 'http://192.168.1.20:8000/api';
 
 function handleError (error) {
   console.warn(error);
   return null;
 }
 
-module.exports = {
+export default {
   getRecipes: function () {
-    return axios.get('http://192.168.1.20:8000/api/recipes/')
+    return axios.get(`${BASEURL}/recipes/`)
       .then(function (response) {
         return response.data.result;
       })
@@ -15,7 +16,7 @@ module.exports = {
   },
 
   getRecipe: function (id) {
-    return axios.get(`http://192.168.1.20:8000/api/recipe/${id}`)
+    return axios.get(`${BASEURL}/recipe/${id}`)
       .then(function (response) {
         return response.data.result[0];
       })
@@ -23,7 +24,7 @@ module.exports = {
   },
 
   getRecipeIngredients: function (id) {
-    return axios.get(`http://192.168.1.20:8000/api/recipe/${id}/ingredients`)
+    return axios.get(`${BASEURL}/recipe/${id}/ingredients`)
       .then(function (response) {
         return response.data.result;
       })
@@ -31,7 +32,7 @@ module.exports = {
   },
 
   saveRecipeIngredients: function (id,ingredients) {
-    return axios.put(`http://192.168.1.20:8000/api/recipe/${id}/ingredients/`,{ data: { ingredients: ingredients } })
+    return axios.put(`${BASEURL}/recipe/${id}/ingredients/`,{ data: { ingredients: ingredients } })
       .then(function (response) {
         return response.data.result;
       })
@@ -39,7 +40,7 @@ module.exports = {
   },
 
   deleteRecipeIngredients: function (id) {
-    return axios.put(`http://192.168.1.20:8000/api/recipe/${id}/ingredients/`)
+    return axios.put(`${BASEURL}/recipe/${id}/ingredients/`)
       .then(function (response) {
         return response.data.result;
       })
@@ -47,7 +48,7 @@ module.exports = {
   },
 
   getMeasurements: function () {
-    return axios.get(`http://192.168.1.20:8000/api/measurements/`)
+    return axios.get(`${BASEURL}/measurements/`)
       .then(function (response) {
         return response.data.result;
       })
@@ -55,7 +56,7 @@ module.exports = {
   },
 
   getIngredients: function () {
-    return axios.get(`http://192.168.1.20:8000/api/ingredients/`)
+    return axios.get(`${BASEURL}/ingredients/`)
       .then(function (response) {
         return response.data.result;
       })
@@ -63,7 +64,7 @@ module.exports = {
   },
 
   getWeeks: function () {
-    return axios.get(`http://192.168.1.20:8000/api/weeks/`)
+    return axios.get(`${BASEURL}/weeks/`)
       .then(function (response) {
         return response.data.result;
       })
@@ -74,7 +75,7 @@ module.exports = {
     let recipe_ids = week.recipes.map((recipe,index) => {
       return {id: recipe.id, cost: recipe.cost};
     });
-    return axios.put(`http://192.168.1.20:8000/api/week/${week.year}/${week.week}/`,{ data: { recipes: recipe_ids } })
+    return axios.put(`${BASEURL}/week/${week.year}/${week.week}/`,{ data: { recipes: recipe_ids } })
       .then(function (response) {
         return response.data.result;
       })
@@ -82,7 +83,7 @@ module.exports = {
   },
 
   deleteWeek: function (week) {
-    return axios.delete(`http://192.168.1.20:8000/api/week/${week.year}/${week.week}/`)
+    return axios.delete(`${BASEURL}/week/${week.year}/${week.week}/`)
       .then(function (response) {
         return response.data.result;
       })
@@ -90,7 +91,7 @@ module.exports = {
   },
 
   shoppingListWeek: function (week) {
-    return axios.get(`http://192.168.1.20:8000/api/shopping/${week.year}/${week.week}/`)
+    return axios.get(`${BASEURL}/shopping/${week.year}/${week.week}/`)
       .then(function (response) {
         return response.data.result;
       })
