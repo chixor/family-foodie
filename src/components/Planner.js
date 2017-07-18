@@ -3,7 +3,6 @@ import api from '../modules/api';
 import MenuDate from '../modules/MenuDate';
 import search from '../modules/search';
 import Recipe from './Recipe';
-import Auth from '../modules/Auth';
 
 export default class Planner extends React.Component {
     constructor(props) {
