@@ -1,7 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { NotificationManager } from 'react-notifications';
-import GoogleLogin from 'react-google-login';
 import Auth from '../modules/Auth';
 
 export default class Nav extends React.Component {
@@ -24,16 +23,6 @@ export default class Nav extends React.Component {
     }
 
     render() {
-        var auth = Auth.isUserAuthenticated() ?
-            <div onClick={() => this.logout()}><img title={Auth.getUserName()+' - logout'} className="user-icon" alt="user" src={Auth.getUserImg()}/></div>:
-            <GoogleLogin
-                className="btn btn-success navbar-btn"
-                clientId="658977310896-knrl3gka66fldh83dao2rhgbblmd4un9.apps.googleusercontent.com"
-                buttonText="Login"
-                onSuccess={(res) => this.login(res)}
-                onFailure={(res) => this.login(res)}
-            />
-
         return (
             <div>
                 <nav className="navbar navbar-inverse">
@@ -46,7 +35,7 @@ export default class Nav extends React.Component {
                                 <span className="icon-bar"></span>
                             </button>
                             <a className="navbar-brand" href="#">
-                                <img alt="logo" src="/favicon.png"/>
+                                <img alt="logo" src="/static/favicon.png"/>
                                 Menu Fresh
                             </a>
                         </div>
@@ -58,7 +47,7 @@ export default class Nav extends React.Component {
                                 <li><NavLink activeClassName='active' to="/recipes">All recipes</NavLink></li>
                             </ul>
                             <div className="nav navbar-nav navbar-right">
-                                {auth}
+                                <a href="/accounts/logout" className="btn btn-success navbar-btn">Logout</a>
                             </div>
                             <ul className="nav navbar-nav navbar-right">
                                 <li><a target="_blank" href="http://seasonalfoodguide.com/melbourne-victoria-seasonal-fresh-produce-guide-fruits-vegetables-in-season-availability-australia.html">Melbourne Seasonal Food Guide</a></li>

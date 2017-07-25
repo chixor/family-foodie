@@ -149,10 +149,8 @@
 }
 
 .recipelist article .heroimage {
-  background: transparent no-repeat center 7%;
-  background-size: 109% auto;
-  width: 100%;
-  height: 270px;
+  height: 275px;
+  margin-left: -53px;
 }
 
 .recipelist article h3 {
@@ -194,6 +192,9 @@
 
 .recipe-detail-card {
   width: 50%;
+}
+.recipe-thumb {
+  width: 100%;
 }
 
 .recipe-cost-field {

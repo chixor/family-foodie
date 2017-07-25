@@ -224,11 +224,12 @@ export default class Planner extends React.Component {
                                                 &nbsp;<button className="btn btn-sm btn-default" onClick={() => this.cancel(i)}><span className="glyphicon glyphicon-remove"></span> Cancel</button>
                                             </span>:
                                             (w.cost !== null && typeof w.cost !== 'undefined') ?
-                                                <span>&nbsp;&nbsp;|&nbsp;&nbsp;${w.cost}</span>:
-                                                <span>
-                                                    &nbsp;<button className="btn btn-sm btn-default" onClick={() => this.edit(i)}><span className="glyphicon glyphicon-pencil"></span> Edit</button>
-                                                </span>
+                                                <span>&nbsp;&nbsp;|&nbsp;&nbsp;${w.cost}</span>
+                                                :null
                                     }
+                                    <span>
+                                        &nbsp;<button className="btn btn-sm btn-default" onClick={() => this.edit(i)}><span className="glyphicon glyphicon-pencil"></span> Edit</button>
+                                    </span>
                                 </h2>
                                 <section className={w.unsaved ? 'unsaved weeklist recipelist' : 'weeklist recipelist'}>
                                     {
@@ -254,7 +255,7 @@ export default class Planner extends React.Component {
                                                             <ul className="search-results">
                                                                 {
                                                                     this.state.searchResults.map((r,x) =>
-                                                                        <li key={`recipe-search-results-${x}`} onClick={() => this.addSearchOne(i,r)}><img alt="thumbnail" src={`http://192.168.1.20:8000/static/thumbs/${r.front}.jpg`}/> <span>{r.name}</span></li>
+                                                                        <li key={`recipe-search-results-${x}`} onClick={() => this.addSearchOne(i,r)}><img alt="thumbnail" src={`/static/thumbs/${r.front}.jpg`}/> <span>{r.name}</span></li>
                                                                     )
                                                                 }
                                                             </ul>:

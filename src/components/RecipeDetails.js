@@ -111,15 +111,16 @@ export default class RecipeDetails extends React.Component {
     }
 
     render() {
-        var front, back, thumb;
+        var front, back, thumb, pdf;
 
         if(this.state.recipe.front) {
-            front = <img alt="front of recipe card" className="recipe-detail-card" src={`http://192.168.1.20:8000/static/${this.state.recipe.front}.jpg`}/>;
-            thumb = <img alt="thumbnail" className="recipe-thumb" src={`http://192.168.1.20:8000/static/thumbs/${this.state.recipe.front}.jpg`}/>;
+            pdf = <a href={`/static/resources/${this.state.recipe.front}.pdf`}>Load PDF File</a>;
+            front = <img alt="front of recipe card" className="recipe-detail-card" src={`/static/${this.state.recipe.front}.jpg`}/>;
+            thumb = <img alt="thumbnail" className="recipe-thumb" src={`/static/resources/${this.state.recipe.front}.jpg`}/>;
         }
 
         if(this.state.recipe.back) {
-            back = <img alt="back of recipe card" className="recipe-detail-card" src={`http://192.168.1.20:8000/static/${this.state.recipe.back}.jpg`}/>;
+            back = <img alt="back of recipe card" className="recipe-detail-card" src={`/static/${this.state.recipe.back}.jpg`}/>;
         }
 
         return (
@@ -130,6 +131,7 @@ export default class RecipeDetails extends React.Component {
                     <div className="col-md-5">
                         <center><p>{thumb}</p></center>
                         <p>{this.state.recipe.description}</p>
+                        <p>{pdf}</p>
                     </div>
                     <div className="col-md-7">
                     <table className="table">

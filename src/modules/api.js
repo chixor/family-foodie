@@ -1,6 +1,6 @@
 import axios from 'axios';
 import {NotificationManager} from 'react-notifications';
-var BASEURL = 'http://192.168.1.20:8000/api';
+var BASEURL = '/api';
 
 function handleError (error) {
   console.warn(error);

@@ -25,11 +25,11 @@ export default class Recipe extends React.Component {
             <article>
                 {deleteBtn}{randomBtn}
                 <NavLink target="_blank" to={`/recipe/${this.props.id}`}>
-                    <img alt="thumbnail" src={`http://192.168.1.20:8000/static/thumbs/${this.props.front}.jpg`}/>
+                    <img className="heroimage" alt="thumbnail" src={`/static/resources/${this.props.front}.jpg`}/>
                 </NavLink>
                 <h3>{this.props.name}</h3>
                 {costField}
-                <p>{this.props.prepTime + this.props.cookTime}min{cost}</p>
+                <p><span className="glyphicon glyphicon-time"></span> {this.props.prepTime + this.props.cookTime}min{cost}</p>
             </article>
         );
     }
