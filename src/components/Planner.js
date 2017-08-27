@@ -14,10 +14,11 @@ export default class Planner extends React.Component {
             nextWeek: new MenuDate().nextDateWeek(),
             searchResults: []
         };
-
+        this.limitedList = this.savedLimitedList = [];
         this.searchInput = search.debounce(this.searchInput,800);
 
         // This binding is necessary to make `this` work in the callback
+        this.getRecipesForRandomisation = this.getRecipesForRandomisation.bind(this);
         this.chooseRecipe = this.chooseRecipe.bind(this);
         this.chooseRecipes = this.chooseRecipes.bind(this);
         this.randomizeOne = this.randomizeOne.bind(this);
@@ -56,12 +57,75 @@ export default class Planner extends React.Component {
         });
     }
 
+    /*
+     * Choose recipes based on:
+     * - seasonal ingredients
+     * - primary ingredient must be unique
+     * - secondary ingredient must be unique
+     * - NOT a recipe which has been selected in the last 6 months
+     *
+     * Nice to have:
+     * - finishes ingredients like parmesan, spinach
+     * - uses an ingredient in the 'pantry'
+     *
+     * Initial cull: all recipes used in the last 6 months or recipes for other seasons
+     * primary diff: [beef (beef, steak, fillet), chicken, pork (pork, ham, bacon), duck, lamb (goan), fish (salmon, tilapia), vegetarian (bean, chickpea, Aubergine, pumpkin, sweet potato)]
+     * secondary diff: [rice, pasta (incl noodle and risotto), taco, pizza, potato]
+     */
+    getRecipesForRandomisation() {
+        // if we don't have recipes loaded, exit
+        if(this.state.recipes.length === 0 || this.state.weeks.length === 0) {
+            this.limitedList = [];
+        }
+        // if we've saved this calculation, recover from save
+        if(this.savedLimitedList.length > 0) {
+            this.limitedList = this.savedLimitedList;
+        }
+
+        // disclude the recipes which are designated to seasons other than this one
+        var seasons = [
+            [0,1,11],
+            [2,3,4],
+            [5,6,7],
+            [8,9,10]
+        ];
+        var discludeList = [];
+        var d = new Date();
+        var month = d.getMonth();
+        var thisSeason = seasons.findIndex((s) => {
+            return s.indexOf(month) > -1;
+        });
+        thisSeason++;
+
+        // disclude the recipes we've already scheduled in the last 24 weeks (6 months)
+        this.state.weeks.forEach((w, x) => {
+            if(x < 24) {
+                discludeList = discludeList.concat(w.recipes.map((recipe) => {
+                    return recipe.id;
+                }));
+            }
+        });
+
+        // put it all together
+        this.limitedList = this.savedLimitedList = this.state.recipes.filter((r,x) => {
+            return (discludeList.indexOf(r.id) === -1 && (r.season === null || r.season === thisSeason)) ? true : false;
+        });
+    }
+
     chooseRecipe() {
-        return this.state.recipes[Math.floor(Math.random() * this.state.recipes.length)];
+        var index = this.limitedList[Math.floor(Math.random() * this.limitedList.length)];
+
+        // remove all recipes with matching primary or secondary differential
+        this.limitedList = this.limitedList.filter((r) => {
+            return r.primaryType !== index.primaryType && r.secondaryType !== index.secondaryType;
+        });
+
+        return index;
     }
 
     chooseRecipes(howMany) {
         var randomSelection = [];
+
         if(this.state.recipes.length > 0) {
             for(let x=0; x<howMany; x++) {
                 randomSelection.push(this.chooseRecipe());
@@ -75,6 +139,7 @@ export default class Planner extends React.Component {
      */
 
     randomizeAll(index) {
+        this.getRecipesForRandomisation();
         this.setState(prevState => {
             prevState.weeks[index].recipes = this.chooseRecipes(prevState.weeks[index].recipes.length || 3);
             return prevState;
@@ -83,6 +148,7 @@ export default class Planner extends React.Component {
 
     addWeek(week,year) {
         this.setState(prevState => {
+            this.getRecipesForRandomisation();
             prevState.weeks.unshift({week: week, year: year, recipes: this.chooseRecipes(3), unsaved: true});
             prevState.nextWeek = prevState.nextWeek.nextDateWeek();
             return prevState;
@@ -107,6 +173,7 @@ export default class Planner extends React.Component {
                 if(!Number.isInteger(prevState.weeks[index].cost)) {
                     prevState.weeks[index].cost = undefined;
                 }
+                this.getRecipesForRandomisation();
                 return prevState;
             });
         });
@@ -144,6 +211,17 @@ export default class Planner extends React.Component {
      */
 
     randomizeOne(index,place) {
+        this.getRecipesForRandomisation();
+
+        // remove all recipes with matching primary or secondary differentials
+        this.state.weeks[index].recipes.forEach((recipe,inset) => {
+            if(place !== inset) {
+                this.limitedList = this.limitedList.filter((l) => {
+                    return l.primaryType !== recipe.primaryType && l.secondaryType !== recipe.secondaryType;
+                });
+            }
+        });
+
         this.setState(prevState => {
             prevState.weeks[index].recipes[place] = this.chooseRecipe();
             return prevState;
@@ -216,7 +294,7 @@ export default class Planner extends React.Component {
                                 <h2>
                                     Week {w.week}, {w.year}
                                     {
-                                        w.unsaved ? 
+                                        w.unsaved ?
                                             <span>
                                                 &nbsp;<button className="btn btn-sm btn-default" onClick={() => this.randomizeAll(i)}><span className="glyphicon glyphicon-refresh"></span> Randomize</button>
                                                 &nbsp;<button className="btn btn-sm btn-success" onClick={() => this.save(i)}><span className="glyphicon glyphicon-ok"></span> Save</button>
@@ -224,16 +302,20 @@ export default class Planner extends React.Component {
                                                 &nbsp;<button className="btn btn-sm btn-default" onClick={() => this.cancel(i)}><span className="glyphicon glyphicon-remove"></span> Cancel</button>
                                             </span>:
                                             (w.cost !== null && typeof w.cost !== 'undefined') ?
-                                                <span>&nbsp;&nbsp;|&nbsp;&nbsp;${w.cost}</span>
+                                                <span>&nbsp;&nbsp;|&nbsp;&nbsp;${w.cost.toFixed(2)}</span>
                                                 :null
                                     }
-                                    <span>
-                                        &nbsp;<button className="btn btn-sm btn-default" onClick={() => this.edit(i)}><span className="glyphicon glyphicon-pencil"></span> Edit</button>
-                                    </span>
+                                    {
+                                        !w.unsaved ?
+                                            <span>
+                                                &nbsp;<button className="btn btn-sm btn-default" onClick={() => this.edit(i)}><span className="glyphicon glyphicon-pencil"></span> Edit</button>
+                                            </span>
+                                            :null
+                                    }
                                 </h2>
                                 <section className={w.unsaved ? 'unsaved weeklist recipelist' : 'weeklist recipelist'}>
                                     {
-                                        w.recipes.length ? 
+                                        w.recipes.length ?
                                             w.unsaved ?
                                                 w.recipes.map((r, x) =>
                                                         <Recipe key={`recipe-${x}-${r.id}`} index={x} windex={i} delete={(windex, index) => this.deleteOne(windex, index)} randomize={(windex, index) => this.randomizeOne(windex, index)} costField={(windex, index, value) => this.costOne(windex, index, value)} {...r}/>

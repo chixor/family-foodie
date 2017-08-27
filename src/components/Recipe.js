@@ -18,7 +18,7 @@ export default class Recipe extends React.Component {
             </div>
         }
         if(typeof this.props.cost !== 'undefined' && this.props.cost !== null) {
-          cost = <span>&nbsp;&nbsp;|&nbsp;&nbsp;${this.props.cost}</span>
+          cost = <span>&nbsp;&nbsp;|&nbsp;&nbsp;${this.props.cost.toFixed(2)}</span>
         }
 
         return (
