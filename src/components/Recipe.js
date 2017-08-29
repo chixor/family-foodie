@@ -1,9 +1,13 @@
-import React from 'react'
+import React, { Component } from 'react'
 import { NavLink } from 'react-router-dom'
 
-export default class Recipe extends React.Component {
+export default class Recipe extends Component {
   render () {
-    let randomBtn, deleteBtn, costField, cost = null
+    let randomBtn
+    let deleteBtn
+    let costField
+    let cost = null
+
     if (typeof this.props.randomize !== 'undefined') {
       randomBtn = <div title='randomize' className='corner-triangle-left' onClick={() => this.props.randomize(this.props.windex, this.props.index)}><span className='glyphicon glyphicon-refresh' /></div>
     }
@@ -32,4 +36,4 @@ export default class Recipe extends React.Component {
       </article>
     )
   }
-};
+}

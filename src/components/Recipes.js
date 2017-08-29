@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { Component } from 'react'
 import api from '../modules/api'
 import search from '../modules/search'
 import Recipe from './Recipe'
 
-export default class Recipes extends React.Component {
+export default class Recipes extends Component {
   constructor (props) {
     super()
     this.state = {
@@ -40,7 +40,7 @@ export default class Recipes extends React.Component {
   }
 
   search (value = '', list) {
-    var recipes = list ? list : this.state.allRecipes
+    var recipes = list || this.state.allRecipes
     if (value.length > 0) {
       var split = value.split(/[, ]+/)
       var query = new RegExp(split.join('|'), 'i')
@@ -58,7 +58,7 @@ export default class Recipes extends React.Component {
         <div className='recipe-search navbar-form form-group' role='search'>
           <div className='icon-addon addon-md'>
             <input onChange={(event) => this.searchInput(event.target.value)} ref='searchQuery' type='search' placeholder='Search' className='form-control' id='search' />
-            <label htmlFor='search' className='glyphicon glyphicon-search' rel='tooltip' title='email' />
+            <label htmlFor='search' className='glyphicon glyphicon-search' rel='tooltip' title='search' />
           </div>
         </div>
         <p>{this.state.showRecipes.length} found</p>

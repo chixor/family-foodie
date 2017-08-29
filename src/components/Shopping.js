@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { Component } from 'react'
 import api from '../modules/api'
 import MenuDate from '../modules/MenuDate'
 
-export default class Shopping extends React.Component {
+export default class Shopping extends Component {
   constructor (props) {
     super()
     this.state = {

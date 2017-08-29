@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { Component } from 'react'
 import api from '../modules/api'
 import MenuDate from '../modules/MenuDate'
 import search from '../modules/search'
 import Recipe from './Recipe'
 
-export default class Planner extends React.Component {
+export default class Planner extends Component {
   constructor (props) {
     super()
     this.state = {
@@ -332,7 +332,7 @@ export default class Planner extends React.Component {
                         <div className='recipe-search navbar-form form-group' role='search' onClick={(e) => e.stopPropagation()}>
                           <div className='icon-addon addon-md'>
                             <input autoComplete='false' ref='searchQuery' onChange={(event) => this.searchInput(event.target.value)} type='search' placeholder='Search' className='form-control' id='search' />
-                            <label htmlFor='search' className='glyphicon glyphicon-search' rel='tooltip' title='email' />
+                            <label htmlFor='search' className='glyphicon glyphicon-search' rel='tooltip' title='search' />
                             {
                               this.state.searchResults.length > 0
                                 ? <ul className='search-results'>

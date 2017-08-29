@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { Component } from 'react'
 import { NavLink } from 'react-router-dom'
 import { NotificationManager } from 'react-notifications'
 import Auth from '../modules/Auth'
 
-export default class Nav extends React.Component {
+export default class Nav extends Component {
   login (response) {
     console.log(response)
     typeof response.error !== 'undefined'
