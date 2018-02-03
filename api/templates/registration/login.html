@@ -1,0 +1,49 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="row">
+<div class="col-md-3"></div>
+<div class="col-md-6">
+
+<div class="recipedetail">
+<br/>
+{% if form.errors %}
+<div class="alert alert-success">
+<p>Your username and password didn't match. Please try again.</p>
+</div>
+{% endif %}
+
+{% if next %}
+<div class="alert alert-success">
+    {% if user.is_authenticated %}
+    <p>Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.</p>
+    {% else %}
+    <p>Please login to see this page.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+
+<form method="post" action="{% url 'login' %}">
+{% csrf_token %}
+
+<div class="form-group">
+    <label for="id_username">Username</label>
+    <input class="form-control" autofocus id="id_username" name="username" type="text" required />
+</div>
+<div class="form-group">
+    <label for="id_password">Password</label>
+    <input class="form-control" id="id_password" name="password" type="password" required>
+</div>
+<div class="form-group">
+  <input class="btn btn-success" type="submit" value="login" />
+  <input type="hidden" name="next" value="{{ next }}" />
+</div>
+</form>
+
+</div>
+</div>
+<div class="col-md-3"></div>
+</div>
+{% endblock %}

@@ -19,7 +19,8 @@ export default class App extends React.Component {
                     <div className="container-fluid">
                         <Switch>
                             <Route exact path='/' component={Planner} />
-                            <Route path='/shopping' component={Shopping} />
+                            <Route exact path='/shopping' component={Shopping} />
+                            <Route path='/shopping/:year/:week' component={Shopping} />
                             <Route path='/recipes' component={Recipes} />
                             <Route path='/recipe/:recipeId' component={RecipeDetails} />
                             <Route render={function () {

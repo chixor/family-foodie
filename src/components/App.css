@@ -29,7 +29,7 @@
   color: white; }
 
 .weeklist {
-  border: 5px solid #eee; 
+  border: 5px solid #eee;
   margin: 0 -13px; }
 
 .weeklist input[type="search"] {
@@ -134,15 +134,18 @@
   height: 370px; }
 
 .recipedetail {
-  padding: 0 18px 10pt 18pt; }
+  padding: 0 18px 10pt 14pt; }
 
 .recipelist article a {
   color: black;
   text-decoration: none; }
 
 .recipelist article .heroimage {
+  margin-left: -53px;
   height: 275px;
-  margin-left: -53px; }
+  min-height: 275px;
+  min-width: 363px;
+  background-color: #ddd; }
 
 .recipelist article h3 {
   padding: 6pt;

@@ -5,7 +5,6 @@ import Auth from '../modules/Auth';
 
 export default class Nav extends React.Component {
     login(response) {
-        console.log(response);
         typeof response.error !== 'undefined' ?
             NotificationManager.error(response.error):
             Auth.authenticateUser(response.tokenObj,response.profileObj);

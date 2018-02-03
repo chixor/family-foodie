@@ -157,6 +157,7 @@ export default class Planner extends React.Component {
 
     edit(index) {
         this.setState(prevState => {
+            this.getRecipesForRandomisation();
             prevState.weeks[index].prevRecipes = prevState.weeks[index].recipes;
             prevState.weeks[index].unsaved = true;
             return prevState;
@@ -301,8 +302,8 @@ export default class Planner extends React.Component {
                                                 &nbsp;<button className="btn btn-sm btn-danger" onClick={() => this.delete(i)}><span className="glyphicon glyphicon-remove"></span> Delete</button>
                                                 &nbsp;<button className="btn btn-sm btn-default" onClick={() => this.cancel(i)}><span className="glyphicon glyphicon-remove"></span> Cancel</button>
                                             </span>:
-                                            (w.cost !== null && typeof w.cost !== 'undefined') ?
-                                                <span>&nbsp;&nbsp;|&nbsp;&nbsp;${w.cost.toFixed(2)}</span>
+                                            w.cost ?
+                                                <span className="pricetag">{w.cost.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' })}</span>
                                                 :null
                                     }
                                     {
@@ -318,10 +319,10 @@ export default class Planner extends React.Component {
                                         w.recipes.length ?
                                             w.unsaved ?
                                                 w.recipes.map((r, x) =>
-                                                        <Recipe key={`recipe-${x}-${r.id}`} index={x} windex={i} delete={(windex, index) => this.deleteOne(windex, index)} randomize={(windex, index) => this.randomizeOne(windex, index)} costField={(windex, index, value) => this.costOne(windex, index, value)} {...r}/>
+                                                    <Recipe key={`recipe-${x}-${r.id}`} index={x} windex={i} delete={(windex, index) => this.deleteOne(windex, index)} randomize={(windex, index) => this.randomizeOne(windex, index)} costField={(windex, index, value) => this.costOne(windex, index, value)} {...r}/>
                                                 ):
                                                 w.recipes.map((r, x) =>
-                                                        <Recipe key={`recipe-${x}-${r.id}`} index={x} {...r}/>
+                                                    <Recipe key={`recipe-${x}-${r.id}`} index={x} {...r}/>
                                                 ):
                                             null
                                     }
@@ -337,7 +338,7 @@ export default class Planner extends React.Component {
                                                             <ul className="search-results">
                                                                 {
                                                                     this.state.searchResults.map((r,x) =>
-                                                                        <li key={`recipe-search-results-${x}`} onClick={() => this.addSearchOne(i,r)}><img alt="thumbnail" src={`/static/thumbs/${r.front}.jpg`}/> <span>{r.name}</span></li>
+                                                                        <li key={`recipe-search-results-${x}`} onClick={() => this.addSearchOne(i,r)}><img alt="thumbnail" src={`/assets/resources/${r.front}.jpg`}/> <span>{r.name}</span></li>
                                                                     )
                                                                 }
                                                             </ul>:

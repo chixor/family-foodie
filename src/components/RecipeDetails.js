@@ -114,13 +114,13 @@ export default class RecipeDetails extends React.Component {
         var front, back, thumb, pdf;
 
         if(this.state.recipe.front) {
-            pdf = <a href={`/static/resources/${this.state.recipe.front}.pdf`}>Load PDF File</a>;
-            front = <img alt="front of recipe card" className="recipe-detail-card" src={`/static/${this.state.recipe.front}.jpg`}/>;
-            thumb = <img alt="thumbnail" className="recipe-thumb" src={`/static/resources/${this.state.recipe.front}.jpg`}/>;
+            pdf = <a href={`/assets/resources/${this.state.recipe.front}.pdf`}>Load PDF File</a>;
+            front = <img alt="front of recipe card" className="recipe-detail-card" src={`/assets/${this.state.recipe.front}.jpg`}/>;
+            thumb = <img alt="thumbnail" className="recipe-thumb" src={`/assets/resources/${this.state.recipe.front}.jpg`}/>;
         }
 
         if(this.state.recipe.back) {
-            back = <img alt="back of recipe card" className="recipe-detail-card" src={`/static/${this.state.recipe.back}.jpg`}/>;
+            back = <img alt="back of recipe card" className="recipe-detail-card" src={`/assets/${this.state.recipe.back}.jpg`}/>;
         }
 
         return (
@@ -196,8 +196,8 @@ export default class RecipeDetails extends React.Component {
                                             <button onClick={() => this.deleteIngredient(i)} className="btn btn-danger"><span className="glyphicon glyphicon-remove"></span></button>
                                         </td>
                                     </tr>
-                                )}  
-                            </tbody>                             
+                                )}
+                            </tbody>
                         }
                     </table>
                     {

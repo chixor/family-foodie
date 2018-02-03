@@ -18,14 +18,15 @@ export default class Recipe extends React.Component {
             </div>
         }
         if(typeof this.props.cost !== 'undefined' && this.props.cost !== null) {
-          cost = <span>&nbsp;&nbsp;|&nbsp;&nbsp;${this.props.cost.toFixed(2)}</span>
+          //cost = <span>&nbsp;&nbsp;|&nbsp;&nbsp;${this.props.cost.toFixed(2)}</span>
+          cost = <span className="pricetag">{this.props.cost.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' })}</span>
         }
 
         return (
             <article>
                 {deleteBtn}{randomBtn}
                 <NavLink target="_blank" to={`/recipe/${this.props.id}`}>
-                    <img className="heroimage" alt="thumbnail" src={`/static/resources/${this.props.front}.jpg`}/>
+                    <img className="heroimage" alt="thumbnail" src={`/assets/resources/${this.props.front}.jpg`}/>
                 </NavLink>
                 <h3>{this.props.name}</h3>
                 {costField}

@@ -141,7 +141,7 @@
 }
 
 .recipedetail {
-    padding: 0 18px 10pt 18pt;
+    padding: 0 18px 10pt 14pt;
 }
 
 .recipelist article a {
@@ -150,8 +150,11 @@
 }
 
 .recipelist article .heroimage {
-  height: 275px;
   margin-left: -53px;
+  height: 275px;
+  min-height: 275px;
+  min-width: 363px;
+  background-color: #ddd;
 }
 
 .recipelist article h3 {
@@ -233,7 +236,7 @@
 }
 
 .icon-addon.addon-md .glyphicon,
-.icon-addon .glyphicon, 
+.icon-addon .glyphicon,
 .icon-addon.addon-md .fa,
 .icon-addon .fa {
     position: absolute;

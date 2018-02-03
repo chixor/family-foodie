@@ -4,8 +4,117 @@ body {
 }
 h2 {
   font-size: 26px;
+  /*font-family: Georgia, sans;*/
 }
-.table>tbody>tr>td, 
+h2 button {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+h2.shopping-week {
+  margin: 10px 0 20px 0;
+}
+.supermarket-category {
+  border-left: 5px solid white;
+  padding-left: 7px!important;
+  padding-right: 5px !important;
+}
+.supermarket-category-meat {
+  border-color: #e6373d;
+}
+.supermarket-category-fresh-herbs {
+  border-color: #13a40b;
+}
+.supermarket-category-fresh-fruitvege {
+  border-color: #3cd537;
+}
+.supermarket-category-nutsroot-vege {
+  border-color: #f7989b;
+}
+.supermarket-category-deli {
+  border-color: #95cddb;
+}
+.supermarket-category-bakery {
+  border-color: #f7cf68;
+}
+.supermarket-category-center-aisles {
+  border-color: #ddd;
+}
+.supermarket-category-dairy {
+  border-color: #64b2fb;
+}
+
+*[draggable="true"] {
+  cursor: grab;
+}
+.dragover > td {
+  position: relative;
+}
+.dragover > td:after {
+  content: " ";
+  width: 100%;
+  border: 3px solid #ddd;
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+}
+.droppable {
+  background-color: #eee;
+  color: #eee;
+  transition: color 0.2s ease
+}
+.float-right {
+  float: right;
+}
+.align-right {
+  text-align: right;
+}
+.ingredient-quantity {
+  width: 20%;
+  white-space: nowrap;
+}
+.ingredient-price {
+  width: 5%;
+  text-align: right;
+}
+.checked {
+  color: #ddd;
+}
+.ingredient-input {
+  width: 100%;
+}
+.table>tbody>tr>td,
 .table>tbody>tr>th {
-  padding: 6px 12px;
+  padding: 6px 0;
+}
+.pricetag{
+  white-space: nowrap;
+  position: relative;
+  margin: 0 0 0 1.2em;
+  displaY: inline-block;
+  border-radius: 0 .3em .3em 0;
+  padding: .25em .7em .2em .6em;
+  background: #5cb85c;
+  color: #fff;
+  line-height: 1;
+  font-size: 78%;
+  font-family: Helvetica;
+}
+.pricetag:before{
+  position: absolute;
+  content: "\25CF";
+  color: #fff;
+  font-size: 50%;
+  line-height: 0;
+  text-indent: 1.3em;
+  left: -1.4em;
+  top: 0;
+  width: 1px;
+  height: 0;
+  border-right: 1.4em solid #5cb85c;
+  border-top: 1.4em solid transparent;
+  border-bottom: 1.4em solid transparent;
+}
+.recipelist .pricetag {
+  position: absolute;
+  top: 267px;
+  right: 6px;
 }

@@ -1,6 +1,10 @@
 import axios from 'axios';
-import {NotificationManager} from 'react-notifications';
+import { NotificationManager } from 'react-notifications';
 var BASEURL = '/api';
+//var BASEURL = 'http://localhost:8000/api';
+
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 
 function handleError (error) {
   console.warn(error);
@@ -99,6 +103,47 @@ export default {
   shoppingListWeek: function (week) {
     return axios.get(`${BASEURL}/shopping/${week.year}/${week.week}/`)
       .then(function (response) {
+        return response.data.result;
+      })
+      .catch(handleError);
+  },
+
+  saveShoppingList: function (week,ingredients) {
+    return axios.put(`${BASEURL}/shopping/${week.year}/${week.week}/`,{ data: { ingredients: ingredients } })
+      .then(function (response) {
+        NotificationManager.success('Lists saved successfully');
+        return response.data.result;
+      })
+      .catch(handleError);
+  },
+
+  addShoppingListItem: function (week,name,sort) {
+    return axios.post(`${BASEURL}/shopping/${week.year}/${week.week}/`,{ data: { name: name, sort: sort } })
+      .then(function (response) {
+        NotificationManager.success('Item added successfully');
+        return response.data.id;
+      })
+      .catch(handleError);
+  },
+
+  deleteShoppingListItem: function (week,id) {
+    return axios.delete(`${BASEURL}/shopping/${week.year}/${week.week}/`,{ data: { id: id } })
+      .then(function (response) {
+        NotificationManager.success('Item deleted successfully');
+        return response.data.result;
+      })
+      .catch(handleError);
+  },
+
+  resetShoppingList: function (week) {
+    return axios.delete(`${BASEURL}/shopping/${week.year}/${week.week}/`,{ data: { reset: true } })
+      .catch(handleError);
+  },
+
+  purchaseShoppingListItem: function (week,id,purchased) {
+    return axios.put(`${BASEURL}/shopping/${week.year}/${week.week}/`,{ data: { id: id, purchased: purchased } })
+      .then(function (response) {
+        NotificationManager.success('Item updated successfully');
         return response.data.result;
       })
       .catch(handleError);
