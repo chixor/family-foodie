@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { NotificationContainer } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
@@ -9,7 +9,7 @@ import Planner from './Planner';
 import Recipes from './Recipes';
 import RecipeDetails from './RecipeDetails';
 
-export default class App extends React.Component {
+export default class App extends Component {
     render() {
         return (
             <BrowserRouter>

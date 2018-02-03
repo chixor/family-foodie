@@ -1,7 +1,7 @@
-import React from "react";
-import api from '../modules/api';
+import React, { Component } from "react";
+import api from '../utils/api';
 
-export default class RecipeDetails extends React.Component {
+export default class RecipeDetails extends Component {
     constructor(props) {
         super();
         this.state = {

@@ -1,10 +1,10 @@
-import React from 'react';
-import api from '../modules/api';
-import MenuDate from '../modules/MenuDate';
-import search from '../modules/search';
+import React, { Component } from 'react';
+import api from '../utils/api';
+import MenuDate from '../utils/MenuDate';
+import search from '../utils/search';
 import Recipe from './Recipe';
 
-export default class Planner extends React.Component {
+export default class Planner extends Component {
     constructor(props) {
         super();
         this.state = {
@@ -168,12 +168,6 @@ export default class Planner extends React.Component {
         api.saveWeek(this.state.weeks[index]).then(() => {
             this.setState(prevState => {
                 prevState.weeks[index].unsaved = undefined;
-                prevState.weeks[index].cost = prevState.weeks[index].recipes.reduce((sum, recipe) => {
-                    return sum + parseFloat(recipe.cost,10);
-                },0);
-                if(!Number.isInteger(prevState.weeks[index].cost)) {
-                    prevState.weeks[index].cost = undefined;
-                }
                 this.getRecipesForRandomisation();
                 return prevState;
             });
@@ -252,13 +246,6 @@ export default class Planner extends React.Component {
         });
     }
 
-    costOne(index,place,value) {
-        this.setState(prevState => {
-            prevState.weeks[index].recipes[place].cost = value;
-            return prevState;
-        });
-    }
-
     searchInput(value) {
         var results = [];
 
@@ -278,10 +265,6 @@ export default class Planner extends React.Component {
             return prevState.searchResults = results;
         });
     }
-
-    /**
-     * render!
-     */
 
     render() {
         return (
@@ -303,7 +286,7 @@ export default class Planner extends React.Component {
                                                 &nbsp;<button className="btn btn-sm btn-default" onClick={() => this.cancel(i)}><span className="glyphicon glyphicon-remove"></span> Cancel</button>
                                             </span>:
                                             w.cost ?
-                                                <span className="pricetag">{w.cost.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' })}</span>
+                                                <span className="pricetag"><sup>$</sup>{w.cost.toFixed(2)}</span>
                                                 :null
                                     }
                                     {
@@ -319,10 +302,21 @@ export default class Planner extends React.Component {
                                         w.recipes.length ?
                                             w.unsaved ?
                                                 w.recipes.map((r, x) =>
-                                                    <Recipe key={`recipe-${x}-${r.id}`} index={x} windex={i} delete={(windex, index) => this.deleteOne(windex, index)} randomize={(windex, index) => this.randomizeOne(windex, index)} costField={(windex, index, value) => this.costOne(windex, index, value)} {...r}/>
+                                                    <Recipe
+                                                      key={`recipe-${x}-${r.id}`}
+                                                      index={x}
+                                                      windex={i}
+                                                      delete={(windex, index) => this.deleteOne(windex, index)}
+                                                      randomize={(windex, index) => this.randomizeOne(windex, index)}
+                                                      {...r}
+                                                    />
                                                 ):
                                                 w.recipes.map((r, x) =>
-                                                    <Recipe key={`recipe-${x}-${r.id}`} index={x} {...r}/>
+                                                    <Recipe
+                                                      key={`recipe-${x}-${r.id}`}
+                                                      index={x}
+                                                      {...r}
+                                                    />
                                                 ):
                                             null
                                     }

@@ -96,7 +96,7 @@ h2.shopping-week {
   color: #fff;
   line-height: 1;
   font-size: 78%;
-  font-family: Helvetica;
+  font-family: "Nobel-RM", sans-serif;
 }
 .pricetag:before{
   position: absolute;
@@ -113,8 +113,13 @@ h2.shopping-week {
   border-top: 1.4em solid transparent;
   border-bottom: 1.4em solid transparent;
 }
+.pricetag sup {
+  top: -.4em;
+  font-size: 60%;
+  padding-right: 0.2em;
+}
 .recipelist .pricetag {
   position: absolute;
-  top: 267px;
+  top: 253px;
   right: 6px;
 }

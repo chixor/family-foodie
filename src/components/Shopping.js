@@ -1,9 +1,9 @@
-import React from 'react';
-import api from '../modules/api';
-import MenuDate from '../modules/MenuDate';
+import React, { Component } from 'react';
+import api from '../utils/api';
+import MenuDate from '../utils/MenuDate';
 import { NotificationManager } from 'react-notifications';
 
-export default class Shopping extends React.Component {
+export default class Shopping extends Component {
     constructor(props) {
         super();
         this.state = {

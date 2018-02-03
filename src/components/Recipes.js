@@ -1,9 +1,9 @@
-import React from "react";
-import api from '../modules/api';
-import search from '../modules/search';
+import React, { Component } from "react";
+import api from '../utils/api';
+import search from '../utils/search';
 import Recipe from './Recipe';
 
-export default class Recipes extends React.Component {
+export default class Recipes extends Component {
 
     constructor(props) {
         super();

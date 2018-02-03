@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { NotificationManager } from 'react-notifications';
 var BASEURL = '/api';
-//var BASEURL = 'http://localhost:8000/api';
 
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
