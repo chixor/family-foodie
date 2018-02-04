@@ -35,7 +35,7 @@ export default class Nav extends Component {
                             </button>
                             <a className="navbar-brand" href="#">
                                 <img alt="logo" src="/static/favicon.png"/>
-                                Menu Fresh
+                                Family Foodie
                             </a>
                         </div>
 
@@ -43,7 +43,7 @@ export default class Nav extends Component {
                             <ul className="nav navbar-nav">
                                 <li><NavLink exact activeClassName='active' to='/'>Planner</NavLink></li>
                                 <li><NavLink activeClassName='active' to="/shopping">Shopping</NavLink></li>
-                                <li><NavLink activeClassName='active' to="/recipes">All recipes</NavLink></li>
+                                <li><NavLink activeClassName='active' to="/recipes">Recipes</NavLink></li>
                             </ul>
                             <div className="nav navbar-nav navbar-right">
                                 <a href="/accounts/logout" className="btn btn-success navbar-btn">Logout</a>
