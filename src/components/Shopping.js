@@ -196,7 +196,6 @@ export default class Shopping extends Component {
                                   <tr>
                                       <th>Ingredients</th>
                                       <th className="ingredient-quantity">2p</th>
-                                      <th className="ingredient-quantity">4p</th>
                                   </tr>
                                   {this.state.ingredients.pantry && this.state.ingredients.pantry.map((r, i) => {
                                     return <tr
@@ -207,7 +206,6 @@ export default class Shopping extends Component {
                                         key={`ingredient-${r.ingredient}-${r.recipeIngredient_id}`}>
                                           <td>{r.ingredient}</td>
                                           <td>{r.quantity} {r.quantityMeasure}{parseFloat(r.quantity) > 1 ? 's':null}</td>
-                                          <td>{r.quantity4} {r.quantityMeasure}{parseFloat(r.quantity4) > 1 ? 's':null}</td>
                                       </tr>
                                   })}
                               </tbody>
