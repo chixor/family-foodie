@@ -146,7 +146,6 @@ export default class Shopping extends Component {
                     <h2 className="shopping-week">
                       Week {this.datestamp.week}
                       <button className="btn btn-default float-right" onClick={() => this.reset()}><span className="glyphicon glyphicon-refresh"></span> Reset</button>
-                      <button className="btn btn-default float-right" onClick={() => this.checkAvailability()}><span className="glyphicon glyphicon-exclamation-sign"></span> Check Availability</button>
                     </h2>
                     <h4 className="shopping-week">
                       {this.firstDay.formatText()} ↣ {this.lastDay.formatText()}
