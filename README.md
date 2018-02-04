@@ -1,4 +1,4 @@
-## Menu fresh
+## Menu Fresh: Installation Notes
 
 Notes to run this on a local dev environment (mac osx):
 
@@ -8,13 +8,7 @@ cd menu-fresh
 npm install
 ```
 
-You can run the frontend react via `npm` but it'll receive 403 Permission Denied errors from the Django API for various reasons. Django is protected with Basic Auth and csrftoken, so expects to receive these cookies back after it's set them. If you're really keen you can disable Basic Auth by emptying the `return_403` decorator in `api/menus/views.py` and disable csrftoken in `settings.py`.
-
-Running the frontend independently of the backend:
-
-```
-npm start
-```
+You can run the frontend react via `npm start` but it'll receive 403 Permission Denied errors from the Django API for various reasons. Django is protected with Basic Auth and csrftoken, so expects to receive these cookies back after it's set them. If you're really keen you can disable Basic Auth by emptying the `return_403` decorator in `api/menus/views.py` and disable csrftoken in `settings.py`.
 
 Build the frontend to make it available to the backend to serve:
 
@@ -22,9 +16,9 @@ Build the frontend to make it available to the backend to serve:
 npm run build
 ```
 
-Follow the instructions for installing *mysql* and *Django*: https://docs.djangoproject.com/en/2.0/topics/install/
+Follow the instructions for installing **mysql** and **Django**: https://docs.djangoproject.com/en/2.0/topics/install/
 
-It's recommended to run Django in a *virtualenv* to ensure your version of python/django doesn't interfere with any other projects: https://virtualenv.pypa.io/en/stable/installation/
+It's recommended to run Django in a **virtualenv** to ensure your version of python/django doesn't interfere with any other projects: https://virtualenv.pypa.io/en/stable/installation/
 
 Here's what I did:
 
