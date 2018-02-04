@@ -40,6 +40,17 @@ export default class Shopping extends Component {
       });
     }
 
+    checkAvailability = () => {
+      api.checkAvailability(this.state.ingredients.fresh).then((result) => {
+        var ingredients = this.state.ingredients;
+        result.forEach((i,k) => {
+          ingredients.fresh[k].isPurchasable = i.IsPurchasable;
+        });
+        NotificationManager.success('Available ingredients highlighted in green');
+        this.setState({ ingredients });
+      });
+    }
+
     save = () => {
       api.saveShoppingList(
         this.datestamp,
@@ -133,9 +144,13 @@ export default class Shopping extends Component {
                 <div className="row">
                 <div className="col-md-12">
                     <h2 className="shopping-week">
-                      Week {this.datestamp.week} - {this.firstDay.formatText()} to {this.lastDay.formatText()}
+                      Week {this.datestamp.week}
                       <button className="btn btn-default float-right" onClick={() => this.reset()}><span className="glyphicon glyphicon-refresh"></span> Reset</button>
+                      <button className="btn btn-default float-right" onClick={() => this.checkAvailability()}><span className="glyphicon glyphicon-exclamation-sign"></span> Check Availability</button>
                     </h2>
+                    <h4 className="shopping-week">
+                      {this.firstDay.formatText()} ↣ {this.lastDay.formatText()}
+                    </h4>
                 </div>
                 </div>
                 <div className="row">
@@ -150,21 +165,19 @@ export default class Shopping extends Component {
                                   <tr>
                                       <th colSpan="2">Ingredients</th>
                                       <th className="ingredient-quantity">2p</th>
-                                      <th className="ingredient-quantity">4p</th>
                                       <th className="ingredient-price">Price</th>
                                   </tr>
                                   {this.state.ingredients.fresh && this.state.ingredients.fresh.map((r, i) => {
                                     return <tr
-                                        className={`${r.purchased ? 'checked' : ''} ${r.dragover ? 'dragover' : ''}`}
+                                        className={`${r.purchased ? 'checked' : ''} ${r.dragover ? 'dragover' : ''} ${r.isPurchasable ? 'can-purchase' : ''}`}
                                         draggable="true"
                                         onDragStart={() => this.dragStart(r,'fresh',i)}
                                         onDragEnter={() => this.dragEnterRow('fresh',i)}
                                         key={`ingredient-${r.ingredient}-${r.recipeIngredient_id}`}
                                       >
-                                          <td className={`supermarket-category supermarket-category-${r.category ? r.category.replace(' & ','').replace(' ','-'): ''}`}><input onChange={() => this.purchase(i)} type="checkbox" checked={r.purchased}/></td>
+                                          <td className={`column-checkbox supermarket-category supermarket-category-${r.category ? r.category.replace(' & ','').replace(' ','-'): ''}`}><input onChange={() => this.purchase(i)} type="checkbox" checked={r.purchased}/></td>
                                           <td>{r.ingredient}</td>
                                           <td>{r.quantity} {r.quantityMeasure}{parseFloat(r.quantity) > 1 ? 's':null}</td>
-                                          <td>{r.quantity4} {r.quantityMeasure}{parseFloat(r.quantity4) > 1 ? 's':null}</td>
                                           {r.recipeIngredient_id ?
                                             <td className="align-right">{r.cost && r.cost.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' })}</td>:
                                             <td className="align-right"><span onClick={() => this.delete(i)} className="glyphicon glyphicon-remove"></span></td>}

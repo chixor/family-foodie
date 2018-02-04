@@ -7,14 +7,19 @@ h2 {
   /*font-family: Georgia, sans;*/
 }
 h2 button {
-  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 h2.shopping-week {
-  margin: 10px 0 20px 0;
+  margin: 10px 0 6px;
+}
+h4.shopping-week {
+  font-size: 140%;
+  margin: 5px 0 15px;
+  font-family: Georgia, sans;
 }
 .supermarket-category {
   border-left: 5px solid white;
-  padding-left: 7px!important;
+  padding-left: 7px !important;
   padding-right: 5px !important;
 }
 .supermarket-category-meat {
@@ -59,7 +64,7 @@ h2.shopping-week {
 .droppable {
   background-color: #eee;
   color: #eee;
-  transition: color 0.2s ease
+  transition: color 0.2s ease;
 }
 .float-right {
   float: right;
@@ -74,6 +79,7 @@ h2.shopping-week {
 .ingredient-price {
   width: 5%;
   text-align: right;
+  white-space: nowrap;
 }
 .checked {
   color: #ddd;
@@ -81,24 +87,24 @@ h2.shopping-week {
 .ingredient-input {
   width: 100%;
 }
-.table>tbody>tr>td,
-.table>tbody>tr>th {
+.table > tbody > tr > td,
+.table > tbody > tr > th {
   padding: 6px 0;
 }
-.pricetag{
+.pricetag {
   white-space: nowrap;
   position: relative;
   margin: 0 0 0 1.2em;
   displaY: inline-block;
-  border-radius: 0 .3em .3em 0;
-  padding: .25em .7em .2em .6em;
+  border-radius: 0 0.3em 0.3em 0;
+  padding: 0.25em 0.7em 0.2em 0.6em;
   background: #5cb85c;
   color: #fff;
   line-height: 1;
   font-size: 78%;
   font-family: "Nobel-RM", sans-serif;
 }
-.pricetag:before{
+.pricetag:before {
   position: absolute;
   content: "\25CF";
   color: #fff;
@@ -113,6 +119,9 @@ h2.shopping-week {
   border-top: 1.4em solid transparent;
   border-bottom: 1.4em solid transparent;
 }
+.can-purchase {
+  background: linear-gradient(to right, rgba(97,183,95,0.3) 0%, rgba(0,0,0,0) 80%);
+}
 .pricetag sup {
   top: -.4em;
   font-size: 60%;
@@ -122,4 +131,7 @@ h2.shopping-week {
   position: absolute;
   top: 253px;
   right: 6px;
+}
+.column-checkbox {
+  width: 1% !important;
 }

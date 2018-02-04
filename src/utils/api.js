@@ -142,8 +142,21 @@ export default {
   purchaseShoppingListItem: function (week,id,purchased) {
     return axios.put(`${BASEURL}/shopping/${week.year}/${week.week}/`,{ data: { id: id, purchased: purchased } })
       .then(function (response) {
-        NotificationManager.success('Item updated successfully');
         return response.data.result;
+      })
+      .catch(handleError);
+  },
+
+  checkAvailability: function (ingredients) {
+    const list = ingredients.reduce((a, b) => {
+      return b.stockcode
+        ? {stockcode: a.stockcode + ',' + b.stockcode}
+        : {stockcode: a.stockcode}
+      }
+    );
+    return axios.get(`https://www.woolworths.com.au/apis/ui/products/${list.stockcode}`)
+      .then(function (response) {
+        return response.data;
       })
       .catch(handleError);
   }

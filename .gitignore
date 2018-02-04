@@ -13,6 +13,7 @@
 # sensitive information
 /public/assets
 /api/settings.py
+README_PRIVATE.md
 
 # misc
 .DS_Store
