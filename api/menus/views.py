@@ -44,7 +44,7 @@ def MeasureList(request):
 
 @return_403
 def IngredientList(request):
-    return JsonResponse(dict(result=list(Ingredients.objects.values('name').order_by('name'))))
+    return JsonResponse(dict(result=list(Ingredients.objects.values('id','name','category__id','category__name','cost','stockcode').order_by('category__id','name'))))
 
 @return_403
 def RecipeDetail(request,pk):
@@ -110,6 +110,7 @@ def ShoppingLister(request, year, week):
                 ing['quantityMeasure'] = recipe.quantityMeasure.name
                 ing['quantity'] = recipe.quantity
                 ing['quantity4'] = recipe.quantity4
+                ing['stockcode'] = recipe.ingredient.stockcode
             else:
                 ing['ingredient'] = ing['name']
 
