@@ -1,3 +1,69 @@
+## Menu fresh
+
+Notes to run this on a local dev environment (mac osx):
+
+```
+git clone https://github.com/chixor/menu-fresh.git
+cd menu-fresh
+npm install
+```
+
+You can run the frontend react via `npm` but it'll receive 403 Permission Denied errors from the Django API for various reasons. Django is protected with Basic Auth and csrftoken, so expects to receive these cookies back after it's set them. If you're really keen you can disable Basic Auth by emptying the `return_403` decorator in `api/menus/views.py` and disable csrftoken in `settings.py`.
+
+Running the frontend independently of the backend:
+
+```
+npm start
+```
+
+Build the frontend to make it available to the backend to serve:
+
+```
+npm run build
+```
+
+Follow the instructions for installing *mysql* and *Django*: https://docs.djangoproject.com/en/2.0/topics/install/
+
+It's recommended to run Django in a *virtualenv* to ensure your version of python/django doesn't interfere with any other projects: https://virtualenv.pypa.io/en/stable/installation/
+
+Here's what I did:
+
+```
+pip install virtualenv
+virtualenv -p python3 env
+source env/bin/activate
+pip install mysqlclient
+pip install django
+# to get out of virtualenv just type: deactivate
+```
+
+Setup Django with your local environment configuration (eg, mysql database, passwords, ALLOWED_HOSTS, etc):
+
+```
+cd api/
+cp settings.py.template settings.py
+vim settings.py
+```
+
+Run Django:
+
+```
+cd api/
+python3 manage.py runserver
+```
+
+Other useful commands:
+
+```
+./manage.py makemigrations
+./manage.py migrate
+```
+
+Tested in versions:
+* Python 2.7.10
+* Django 2.0.1
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>
@@ -1516,17 +1582,17 @@ When you build the project, Create React App will place the `public` folder cont
 2. Install `serve` by running `npm install --save serve`.
 
 3. Add this line to `scripts` in `package.json`:
-    
+
     ```
     "now-start": "serve build/",
     ```
-    
+
 4. Run `now` from your project directory. You will see a **now.sh** URL in your output like this:
-    
+
     ```
     > Ready! https://your-project-dirname-tpspyhtdtk.now.sh (copied to clipboard)
     ```
-    
+
     Paste that URL into your browser when the build is complete, and you will see your deployed app.
 
 Details are available in [this article.](https://zeit.co/blog/now-static)
