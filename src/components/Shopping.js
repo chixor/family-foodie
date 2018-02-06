@@ -30,7 +30,7 @@ export default class Shopping extends Component {
       }
 
       api.shoppingListWeek(this.datestamp).then((ingredients) => {
-          var cost = ingredients.fresh.reduce((a, b) => { return b.cost ? {cost: a.cost + b.cost} : {cost: a.cost}});
+          var cost = ingredients.fresh.reduce((a, b) => { return b.cost ? {cost: a.cost + Number(b.cost)} : {cost: a.cost}});
           this.setState({ ingredients, cost: cost.cost });
       });
     }
@@ -96,7 +96,7 @@ export default class Shopping extends Component {
         drag.toIndex + 1: drag.toIndex;
 
       ingredients[drag.toList].splice(drag.toIndex, 0, drag.ingredient);
-      cost = ingredients.fresh.reduce((a, b) => ({cost: a.cost + b.cost}));
+      cost = ingredients.fresh.reduce((a, b) => ({cost: a.cost + Number(b.cost)}));
       this.setState({ ingredients, cost: cost.cost, drag: undefined }, this.save);
     }
 
@@ -149,7 +149,8 @@ export default class Shopping extends Component {
           return i;
         });
         api.saveShoppingList(this.datestamp, ingredients.fresh).then(() => {
-          this.setState({editPrices: !this.state.editPrices, ingredients});
+          const cost = ingredients.fresh.reduce((a, b) => ({cost: a.cost + Number(b.cost)}));
+          this.setState({editPrices: !this.state.editPrices, ingredients, cost: cost.cost});
         });
       } else {
         this.setState({editPrices: !this.state.editPrices});
