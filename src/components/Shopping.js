@@ -8,7 +8,8 @@ export default class Shopping extends Component {
         super();
         this.state = {
             ingredients: [],
-            cost: 0
+            cost: 0,
+            editPrices: false
         }
         this.firstDay = new MenuDate().toFirstDayOfTheWeek();
         this.lastDay = new MenuDate().toLastDayOfTheWeek();
@@ -138,6 +139,23 @@ export default class Shopping extends Component {
       });
     }
 
+    editPrices = () => {
+      if(this.state.editPrices) {
+        var ingredients = this.state.ingredients;
+        ingredients.fresh = this.state.ingredients.fresh.map(i => {
+          if(i.recipeIngredient_id) {
+            i.cost = parseFloat(this.refs['cost-'+i.recipeIngredient_id].value);
+          }
+          return i;
+        });
+        api.saveShoppingList(this.datestamp, ingredients.fresh).then(() => {
+          this.setState({editPrices: !this.state.editPrices, ingredients});
+        });
+      } else {
+        this.setState({editPrices: !this.state.editPrices});
+      }
+    }
+
     render() {
         return (
             <div>
@@ -145,7 +163,7 @@ export default class Shopping extends Component {
                 <div className="col-md-12">
                     <h2 className="shopping-week">
                       Week {this.datestamp.week}
-                      <button className="btn btn-default float-right" onClick={() => this.reset()}><span className="glyphicon glyphicon-refresh"></span> Reset</button>
+                      <button className="btn btn-default float-right" onClick={() => this.reset()}><span className="glyphicon glyphicon-refresh"/> Reset</button>
                     </h2>
                     <h4 className="shopping-week">
                       {this.firstDay.formatText()} ↣ {this.lastDay.formatText()}
@@ -164,7 +182,9 @@ export default class Shopping extends Component {
                                   <tr>
                                       <th colSpan="2">Ingredients</th>
                                       <th className="ingredient-quantity">2p</th>
-                                      <th className="ingredient-price">Price</th>
+                                      <th className="ingredient-price">
+                                        Price&nbsp;<button className={`btn btn-xs float-right ${this.state.editPrices ? 'btn-success' : 'btn-default'}`} onClick={this.editPrices}>{this.state.editPrices ? 'save':'edit'}</button>
+                                      </th>
                                   </tr>
                                   {this.state.ingredients.fresh && this.state.ingredients.fresh.map((r, i) => {
                                     return <tr
@@ -176,13 +196,18 @@ export default class Shopping extends Component {
                                       >
                                           <td className={`column-checkbox supermarket-category supermarket-category-${r.category ? r.category.replace(' & ','').replace(' ','-'): ''}`}><input onChange={() => this.purchase(i)} type="checkbox" checked={r.purchased}/></td>
                                           <td>{r.ingredient}</td>
-                                          <td>{r.quantity} {r.quantityMeasure}{parseFloat(r.quantity) > 1 ? 's':null}</td>
+                                          <td className="ingredient-quantity">{r.quantity} {r.quantityMeasure}{parseFloat(r.quantity) > 1 ? 's':null}</td>
                                           {r.recipeIngredient_id ?
-                                            <td className="align-right">{r.cost && r.cost.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' })}</td>:
+                                            <td className="align-right">
+                                                {this.state.editPrices ?
+                                                  <input defaultValue={r.cost.toFixed(2)} type="text" ref={'cost-'+r.recipeIngredient_id} className="form-control price-field" id={`${r.recipeIngredient_id}-cost`}/>:
+                                                  <span>{r.cost && r.cost.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' })}</span>
+                                                }
+                                            </td>:
                                             <td className="align-right"><span onClick={() => this.delete(i)} className="glyphicon glyphicon-remove"></span></td>}
                                       </tr>
                                   })}
-                                  <tr><td colSpan="5"><form onSubmit={this.add}><input type="text" className="ingredient-input" placeholder="add item..." ref="newIngredient" name="newIngredient"/></form></td></tr>
+                                  <tr><td colSpan="5"><form onSubmit={this.add}><input type="text" className="ingredient-input form-control" placeholder="add item..." ref="newIngredient" name="newIngredient"/></form></td></tr>
                               </tbody>
                           </table>
                         </div>

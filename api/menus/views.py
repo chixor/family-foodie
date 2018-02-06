@@ -128,8 +128,8 @@ def ShoppingLister(request, year, week):
 
     if request.method=='PUT':
         body = json.loads(request.body)
-        sort = 0;
         if 'ingredients' in body['data']:
+            sort = 0;
             for ingredient in body['data']['ingredients']:
                 if 'recipeIngredient_id' in ingredient and ingredient['recipeIngredient_id'] is not None:
                     ShoppingList.objects.filter(pk=ingredient['id']).update(fresh=ingredient['fresh'], cost=ingredient['cost'], sort=sort)
