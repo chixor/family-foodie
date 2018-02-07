@@ -146,7 +146,7 @@ export default class Shopping extends Component {
         var ingredients = this.state.ingredients;
         ingredients.fresh = this.state.ingredients.fresh.map(i => {
           if(i.ingredient_id) {
-            i.cost = parseFloat(this.refs['cost-'+i.ingredient_id].value);
+            i.cost = parseFloat(this.refs['cost-'+i.ingredient_id].value) || null;
           }
           return i;
         });
@@ -203,7 +203,7 @@ export default class Shopping extends Component {
                                           {r.ingredient_id ?
                                             <td className="align-right">
                                                 {this.state.editPrices ?
-                                                  <input defaultValue={r.cost.toFixed(2)} type="text" ref={'cost-'+r.ingredient_id} className="form-control price-field" id={`${r.ingredient_id}-cost`}/>:
+                                                  <input defaultValue={r.cost && r.cost.toFixed(2)} type="text" ref={'cost-'+r.ingredient_id} className="form-control price-field" id={`${r.ingredient_id}-cost`}/>:
                                                   <span>{r.cost && r.cost.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' })}</span>
                                                 }
                                             </td>:
