@@ -49,6 +49,7 @@ python3 manage.py runserver
 Other useful commands:
 
 ```
+./manage.py shell
 ./manage.py makemigrations
 ./manage.py migrate
 ```
