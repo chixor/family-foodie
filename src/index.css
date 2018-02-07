@@ -83,6 +83,7 @@ h4.shopping-week {
 }
 .price-field {
   padding: 3px;
+  margin: -4px 0;
   width: 50px;
   text-align: right;
   height: auto;
