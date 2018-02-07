@@ -116,8 +116,8 @@ export default {
       .catch(handleError);
   },
 
-  addShoppingListItem: function (week,name,sort) {
-    return axios.post(`${BASEURL}/shopping/${week.year}/${week.week}/`,{ data: { name: name, sort: sort } })
+  addShoppingListItem: function (week,name) {
+    return axios.post(`${BASEURL}/shopping/${week.year}/${week.week}/`,{ data: { name: name } })
       .then(function (response) {
         NotificationManager.success('Item added successfully');
         return response.data.id;
@@ -139,8 +139,8 @@ export default {
       .catch(handleError);
   },
 
-  purchaseShoppingListItem: function (week,id,purchased) {
-    return axios.put(`${BASEURL}/shopping/${week.year}/${week.week}/`,{ data: { id: id, purchased: purchased } })
+  purchaseShoppingListItem: function (week,id,ingredient_id,purchased) {
+    return axios.put(`${BASEURL}/shopping/${week.year}/${week.week}/`,{ data: { id: id, ingredient_id: ingredient_id, purchased: purchased } })
       .then(function (response) {
         return response.data.result;
       })

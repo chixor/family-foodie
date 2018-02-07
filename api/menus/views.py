@@ -6,8 +6,8 @@ from django.http import HttpResponse
 from django.template import loader
 from django.http import HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
 from django.contrib.auth.models import User
+from django.db.models import F, Sum, Count, Min, Max
 import json
 
 
@@ -101,27 +101,32 @@ def RecipeWeekList(request):
 @return_403
 def ShoppingLister(request, year, week):
     def getList(fresh):
-        shoppinglist = list(ShoppingList.objects.filter(week=week,year=year,fresh=fresh).order_by('sort').values('id', 'cost', 'fresh', 'name', 'recipeIngredient_id', 'purchased'))
-        for ing in shoppinglist:
-            if ing['recipeIngredient_id'] is not None:
-                recipe = RecipeIngredients.objects.get(id=ing['recipeIngredient_id'])
-                ing['category'] = recipe.ingredient.category.name
-                ing['ingredient'] = recipe.ingredient.name
-                ing['quantityMeasure'] = recipe.quantityMeasure.name
-                ing['quantity'] = recipe.quantity
-                ing['quantity4'] = recipe.quantity4
-                ing['stockcode'] = recipe.ingredient.stockcode
-            else:
-                ing['ingredient'] = ing['name']
+        shoppinglist = list(ShoppingList.objects.filter(
+            week=week,
+            year=year,
+            fresh=fresh
+        ).values(
+            'fresh',
+            'name',
+            'purchased'
+        ).annotate(
+            id=Min('id'),
+            cost=Sum('cost'),
+            ingredient_id=F('recipeIngredient__ingredient__id'),
+            category=F('recipeIngredient__ingredient__category__name'),
+            ingredient=F('recipeIngredient__ingredient__name'),
+            quantityMeasure=F('recipeIngredient__quantityMeasure__name'),
+            sort=Min('sort'),
+            quantity=Sum('recipeIngredient__quantity'),
+            quantity4=Sum('recipeIngredient__quantity4'),
+            stockcode=F('recipeIngredient__ingredient__stockcode')
+        ).order_by('sort'))
 
         return shoppinglist
 
-
     if request.method=='GET':
-        shoppinglistcount = ShoppingList.objects.filter(week=week,year=year).count()
-
         # load from ingredients and recipes tables
-        if shoppinglistcount == 0:
+        if ShoppingList.objects.filter(week=week,year=year).count() == 0:
             generateShoppingList(week,year)
 
         return JsonResponse(dict(result={'fresh': getList(True), 'pantry': getList(False)}))
@@ -131,17 +136,24 @@ def ShoppingLister(request, year, week):
         if 'ingredients' in body['data']:
             sort = 0;
             for ingredient in body['data']['ingredients']:
-                if 'recipeIngredient_id' in ingredient and ingredient['recipeIngredient_id'] is not None:
-                    ShoppingList.objects.filter(pk=ingredient['id']).update(fresh=ingredient['fresh'], cost=ingredient['cost'], sort=sort)
+                if 'ingredient_id' in ingredient and ingredient['ingredient_id'] is not None:
+                    # check cost division for duplicates
+                    if ingredient['cost'] is not None:
+                        ingredient['cost'] = ingredient['cost']/countIngredientDuplicatesInShoppingList(ingredient['ingredient_id'],week,year)
+                    ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient_id=ingredient['ingredient_id']).update(fresh=ingredient['fresh'], cost=ingredient['cost'], sort=sort)
                 else:
                     ShoppingList.objects.filter(pk=ingredient['id']).update(fresh=ingredient['fresh'], sort=sort)
                 sort = sort + 1
         elif 'purchased' in body['data']:
-            ShoppingList.objects.filter(pk=body['data']['id']).update(purchased=body['data']['purchased'])
+            if 'ingredient_id' in body['data'] and body['data']['ingredient_id'] is not None:
+                ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient_id=body['data']['ingredient_id']).update(purchased=body['data']['purchased'])
+            else:
+                ShoppingList.objects.filter(pk=body['data']['id']).update(purchased=body['data']['purchased'])
 
     if request.method=='POST':
         body = json.loads(request.body)
-        result = ShoppingList.objects.create(week=week, year=year, fresh=True, name=body['data']['name'], sort=body['data']['sort'], purchased=False)
+        sort = ShoppingList.objects.filter(week=6,year=2018,fresh=True).aggregate(sort=Max('sort'))['sort']+1
+        result = ShoppingList.objects.create(week=week, year=year, fresh=True, name=body['data']['name'], sort=sort, purchased=False)
         return JsonResponse(dict(id=result.id))
 
     if request.method=='DELETE':
@@ -154,6 +166,9 @@ def ShoppingLister(request, year, week):
     response = HttpResponse()
     response['allow'] = "get, put, delete, post, options"
     return response
+
+def countIngredientDuplicatesInShoppingList(ingredient_id,week,year):
+    return ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient__id=ingredient_id).aggregate(ids=Count('recipeIngredient__ingredient__id'))['ids']
 
 def generateShoppingList(week, year):
     recipes = RecipeWeek.objects.filter(week=week,year=year).values('recipe').order_by('id')
@@ -174,6 +189,13 @@ def generateShoppingList(week, year):
     for ingredient in allIngredients:
         ing = ShoppingList.objects.create(week=week, year=year, fresh=ingredient['fresh'], recipeIngredient=RecipeIngredients.objects.get(id=ingredient['id']), cost=ingredient['cost'], sort=sort)
         sort = sort + 1
+
+    # fix prices on duplicates
+    for ingredient in allIngredients:
+        duplicates = countIngredientDuplicatesInShoppingList(ingredient['ingredient'],week,year)
+        if duplicates > 1:
+            cost = ingredient['cost']/duplicates
+            ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient_id=ingredient['ingredient']).update(cost=cost)
 
 @return_403
 def RecipeWeekDetail(request, year, week):

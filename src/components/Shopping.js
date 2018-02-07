@@ -83,7 +83,7 @@ export default class Shopping extends Component {
       var ingredients = this.state.ingredients, drag = this.state.drag, cost;
       ['fresh','pantry'].forEach((i) => {ingredients[i].map((r) => {r.dragover = false})});
 
-      if(!drag.ingredient.recipeIngredient_id && drag.toList === 'pantry') {
+      if(!drag.ingredient.ingredient_id && drag.toList === 'pantry') {
         this.setState({ drag: undefined });
         NotificationManager.warning('Cannot save that to the pantry');
         this.setState({ ingredients });
@@ -106,8 +106,7 @@ export default class Shopping extends Component {
 
       api.addShoppingListItem(
         this.datestamp,
-        this.refs.newIngredient.value,
-        this.state.ingredients.fresh.length
+        this.refs.newIngredient.value
       ).then((id) => {
         if(!id) return;
         var ingredients = this.state.ingredients;
@@ -118,8 +117,10 @@ export default class Shopping extends Component {
     }
 
     delete = (index) => {
-      var id = this.state.ingredients.fresh[index].id;
-      api.deleteShoppingListItem(this.datestamp, id).then(() => {
+      api.deleteShoppingListItem(
+        this.datestamp,
+        this.state.ingredients.fresh[index].id
+      ).then(() => {
         var ingredients = this.state.ingredients;
         ingredients.fresh.splice(index, 1);
         this.setState({ ingredients });
@@ -131,6 +132,7 @@ export default class Shopping extends Component {
       api.purchaseShoppingListItem(
         this.datestamp,
         this.state.ingredients.fresh[index].id,
+        this.state.ingredients.fresh[index].ingredient_id,
         purchased
       ).then(() => {
         var ingredients = this.state.ingredients;
@@ -143,8 +145,8 @@ export default class Shopping extends Component {
       if(this.state.editPrices) {
         var ingredients = this.state.ingredients;
         ingredients.fresh = this.state.ingredients.fresh.map(i => {
-          if(i.recipeIngredient_id) {
-            i.cost = parseFloat(this.refs['cost-'+i.recipeIngredient_id].value);
+          if(i.ingredient_id) {
+            i.cost = parseFloat(this.refs['cost-'+i.ingredient_id].value);
           }
           return i;
         });
@@ -193,15 +195,15 @@ export default class Shopping extends Component {
                                         draggable="true"
                                         onDragStart={() => this.dragStart(r,'fresh',i)}
                                         onDragEnter={() => this.dragEnterRow('fresh',i)}
-                                        key={`ingredient-${r.ingredient}-${r.recipeIngredient_id}`}
+                                        key={`ingredient-${r.ingredient}-${r.id}`}
                                       >
                                           <td className={`column-checkbox supermarket-category supermarket-category-${r.category ? r.category.replace(' & ','').replace(' ','-'): ''}`}><input onChange={() => this.purchase(i)} type="checkbox" checked={r.purchased}/></td>
-                                          <td>{r.ingredient}</td>
+                                          <td>{r.name || r.ingredient}</td>
                                           <td className="ingredient-quantity">{r.quantity} {r.quantityMeasure}{parseFloat(r.quantity) > 1 ? 's':null}</td>
-                                          {r.recipeIngredient_id ?
+                                          {r.ingredient_id ?
                                             <td className="align-right">
                                                 {this.state.editPrices ?
-                                                  <input defaultValue={r.cost.toFixed(2)} type="text" ref={'cost-'+r.recipeIngredient_id} className="form-control price-field" id={`${r.recipeIngredient_id}-cost`}/>:
+                                                  <input defaultValue={r.cost.toFixed(2)} type="text" ref={'cost-'+r.ingredient_id} className="form-control price-field" id={`${r.ingredient_id}-cost`}/>:
                                                   <span>{r.cost && r.cost.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' })}</span>
                                                 }
                                             </td>:
@@ -229,7 +231,7 @@ export default class Shopping extends Component {
                                         draggable="true"
                                         onDragStart={() => this.dragStart(r,'pantry',i)}
                                         onDragEnter={() => this.dragEnterRow('pantry',i)}
-                                        key={`ingredient-${r.ingredient}-${r.recipeIngredient_id}`}>
+                                        key={`ingredient-${r.ingredient}-${r.id}`}>
                                           <td>{r.ingredient}</td>
                                           <td>{r.quantity} {r.quantityMeasure}{parseFloat(r.quantity) > 1 ? 's':null}</td>
                                       </tr>
