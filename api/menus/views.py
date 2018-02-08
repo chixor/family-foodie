@@ -112,7 +112,8 @@ def ShoppingLister(request, year, week):
         ).annotate(
             id=Min('id'),
             cost=Sum('cost'),
-            ingredient_id=F('recipeIngredient__ingredient__id'),
+            defaultCost=F('recipeIngredient__ingredient__cost'),
+            ingredientId=F('recipeIngredient__ingredient__id'),
             category=F('recipeIngredient__ingredient__category__name'),
             ingredient=F('recipeIngredient__ingredient__name'),
             quantityMeasure=F('recipeIngredient__quantityMeasure__name'),
@@ -136,17 +137,20 @@ def ShoppingLister(request, year, week):
         if 'ingredients' in body['data']:
             sort = 0;
             for ingredient in body['data']['ingredients']:
-                if 'ingredient_id' in ingredient and ingredient['ingredient_id'] is not None:
+                if 'ingredientId' in ingredient and ingredient['ingredientId'] is not None:
                     # check cost division for duplicates
                     if ingredient['cost'] is not None:
-                        ingredient['cost'] = ingredient['cost']/countIngredientDuplicatesInShoppingList(ingredient['ingredient_id'],week,year)
-                    ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient_id=ingredient['ingredient_id']).update(fresh=ingredient['fresh'], cost=ingredient['cost'], sort=sort)
+                        ingredient['cost'] = ingredient['cost']/countIngredientDuplicatesInShoppingList(ingredient['ingredientId'],week,year)
+                    ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient_id=ingredient['ingredientId']).update(fresh=ingredient['fresh'], cost=ingredient['cost'], sort=sort)
+
+                    if 'replaceDefaultCost' in ingredient and ingredient['replaceDefaultCost']:
+                        Ingredients.objects.filter(id=ingredient['ingredientId']).update(cost=ingredient['cost']);
                 else:
                     ShoppingList.objects.filter(pk=ingredient['id']).update(fresh=ingredient['fresh'], sort=sort)
                 sort = sort + 1
         elif 'purchased' in body['data']:
-            if 'ingredient_id' in body['data'] and body['data']['ingredient_id'] is not None:
-                ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient_id=body['data']['ingredient_id']).update(purchased=body['data']['purchased'])
+            if 'ingredientId' in body['data'] and body['data']['ingredientId'] is not None:
+                ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient_id=body['data']['ingredientId']).update(purchased=body['data']['purchased'])
             else:
                 ShoppingList.objects.filter(pk=body['data']['id']).update(purchased=body['data']['purchased'])
 

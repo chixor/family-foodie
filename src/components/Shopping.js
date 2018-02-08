@@ -9,7 +9,8 @@ export default class Shopping extends Component {
         this.state = {
             ingredients: [],
             cost: 0,
-            editPrices: false
+            editPrices: false,
+            offerDefaultPriceChange: []
         }
         this.firstDay = new MenuDate().toFirstDayOfTheWeek();
         this.lastDay = new MenuDate().toLastDayOfTheWeek();
@@ -20,18 +21,23 @@ export default class Shopping extends Component {
     }
 
     componentDidMount() {
-      if(this.props.match.params && this.props.match.params.year) {
-        this.firstDay = new MenuDate(this.props.match.params.year,0,(1 + (parseInt(this.props.match.params.week) - 1) * 7)).toFirstDayOfTheWeek();
-        this.lastDay = new MenuDate(this.props.match.params.year,0,(1 + (parseInt(this.props.match.params.week) - 1) * 7)).toLastDayOfTheWeek();
-        this.datestamp = {
-          week: this.props.match.params.week,
-          year: this.props.match.params.year
-        };
+      const { week, year } = this.props.match.params;
+      if(week && year) {
+        this.firstDay = new MenuDate(year,0,(1 + (parseInt(week) - 1) * 7)).toFirstDayOfTheWeek();
+        this.lastDay = new MenuDate(year,0,(1 + (parseInt(week) - 1) * 7)).toLastDayOfTheWeek();
+        this.datestamp = { week, year };
       }
 
       api.shoppingListWeek(this.datestamp).then((ingredients) => {
-          var cost = ingredients.fresh.reduce((a, b) => { return b.cost ? {cost: a.cost + Number(b.cost)} : {cost: a.cost}});
-          this.setState({ ingredients, cost: cost.cost });
+          var cost = 0, offerDefaultPriceChange = [];
+          if(ingredients.fresh.length > 0) {
+            cost = ingredients.fresh.reduce((a, b) => { return b.cost ? {cost: a.cost + Number(b.cost)} : {cost: a.cost}});
+            ingredients.fresh.forEach((i) => {
+              offerDefaultPriceChange[i.ingredientId] = i.cost !== i.defaultCost;
+            });
+          }
+
+          this.setState({ ingredients, offerDefaultPriceChange, cost: cost.cost });
       });
     }
 
@@ -83,7 +89,7 @@ export default class Shopping extends Component {
       var ingredients = this.state.ingredients, drag = this.state.drag, cost;
       ['fresh','pantry'].forEach((i) => {ingredients[i].map((r) => {r.dragover = false})});
 
-      if(!drag.ingredient.ingredient_id && drag.toList === 'pantry') {
+      if(!drag.ingredient.ingredientId && drag.toList === 'pantry') {
         this.setState({ drag: undefined });
         NotificationManager.warning('Cannot save that to the pantry');
         this.setState({ ingredients });
@@ -110,7 +116,7 @@ export default class Shopping extends Component {
       ).then((id) => {
         if(!id) return;
         var ingredients = this.state.ingredients;
-        ingredients.fresh.push({id: id, fresh: true, ingredient: this.refs.newIngredient.value, purchased: false});
+        ingredients.fresh.push({id: id, cost: null, fresh: true, ingredient: this.refs.newIngredient.value, purchased: false});
         this.refs.newIngredient.value = '';
         this.setState({ ingredients });
       });
@@ -132,7 +138,7 @@ export default class Shopping extends Component {
       api.purchaseShoppingListItem(
         this.datestamp,
         this.state.ingredients.fresh[index].id,
-        this.state.ingredients.fresh[index].ingredient_id,
+        this.state.ingredients.fresh[index].ingredientId,
         purchased
       ).then(() => {
         var ingredients = this.state.ingredients;
@@ -142,21 +148,42 @@ export default class Shopping extends Component {
     }
 
     editPrices = () => {
+      var offerDefaultPriceChange = this.state.offerDefaultPriceChange;
       if(this.state.editPrices) {
         var ingredients = this.state.ingredients;
         ingredients.fresh = this.state.ingredients.fresh.map(i => {
-          if(i.ingredient_id) {
-            i.cost = parseFloat(this.refs['cost-'+i.ingredient_id].value) || null;
+          if(i.ingredientId) {
+            i.cost = parseFloat(this.refs['cost-'+i.ingredientId].value) || null;
+            i.replaceDefaultCost = (this.refs['costDefault-'+i.ingredientId] && this.refs['costDefault-'+i.ingredientId].checked) || false;
           }
           return i;
         });
         api.saveShoppingList(this.datestamp, ingredients.fresh).then(() => {
           const cost = ingredients.fresh.reduce((a, b) => ({cost: a.cost + Number(b.cost)}));
-          this.setState({editPrices: !this.state.editPrices, ingredients, cost: cost.cost});
+          ingredients.fresh.forEach((i) => {
+            if(i.replaceDefaultCost) {
+              i.defaultCost = i.cost;
+              i.replaceDefaultCost = false;
+              offerDefaultPriceChange[i.ingredientId] = false;
+            }
+          });
+          this.setState({editPrices: !this.state.editPrices, ingredients, offerDefaultPriceChange, cost: cost.cost});
         });
       } else {
         this.setState({editPrices: !this.state.editPrices});
       }
+    }
+
+    onChangePrice = (ingredient) => {
+        const ref = this.refs['cost-'+ingredient.ingredientId];
+        var offerDefaultPriceChange = this.state.offerDefaultPriceChange;
+        offerDefaultPriceChange[ingredient.ingredientId] = false;
+
+        if(ref && parseFloat(ref.value) !== ingredient.defaultCost) {
+          offerDefaultPriceChange[ingredient.ingredientId] = true;
+        }
+
+        this.setState({ offerDefaultPriceChange });
     }
 
     render() {
@@ -200,10 +227,13 @@ export default class Shopping extends Component {
                                           <td className={`column-checkbox supermarket-category supermarket-category-${r.category ? r.category.replace(' & ','').replace(' ','-'): ''}`}><input onChange={() => this.purchase(i)} type="checkbox" checked={r.purchased}/></td>
                                           <td>{r.name || r.ingredient}</td>
                                           <td className="ingredient-quantity">{r.quantity} {r.quantityMeasure}{parseFloat(r.quantity) > 1 ? 's':null}</td>
-                                          {r.ingredient_id ?
+                                          {r.ingredientId ?
                                             <td className="align-right">
                                                 {this.state.editPrices ?
-                                                  <input defaultValue={r.cost && r.cost.toFixed(2)} type="text" ref={'cost-'+r.ingredient_id} className="form-control price-field" id={`${r.ingredient_id}-cost`}/>:
+                                                  <div className="popside-container">
+                                                    {this.state.offerDefaultPriceChange[r.ingredientId] && <div className="popside">Make this my default price (replace {r.defaultCost && r.defaultCost.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' })})? <input type="checkbox" ref={'costDefault-'+r.ingredientId}/></div>}
+                                                    <input onChange={() => this.onChangePrice(r)} defaultValue={r.cost && r.cost.toFixed(2)} type="text" ref={'cost-'+r.ingredientId} className="form-control price-field" id={`${r.ingredientId}-cost`}/>
+                                                  </div>:
                                                   <span>{r.cost && r.cost.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' })}</span>
                                                 }
                                             </td>:

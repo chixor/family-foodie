@@ -110,7 +110,7 @@ export default {
   saveShoppingList: function (week,ingredients) {
     return axios.put(`${BASEURL}/shopping/${week.year}/${week.week}/`,{ data: { ingredients: ingredients } })
       .then(function (response) {
-        NotificationManager.success('Lists saved successfully');
+        NotificationManager.success('Saved');
         return response.data.result;
       })
       .catch(handleError);
