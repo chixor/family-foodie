@@ -1,10 +1,7 @@
 export default class MenuDate extends Date {
     constructor(year, week) {
         super()
-        this.date = (typeof year !== 'undefined')
-            ? new Date(year, 0, (1 + (parseInt(week) - 1) * 7))
-            : new Date()
-
+        this.date = typeof year !== 'undefined' ? new Date(year, 0, 1 + (parseInt(week) - 1) * 7) : new Date()
         return this
     }
 
@@ -32,7 +29,6 @@ export default class MenuDate extends Date {
         return this.date.getFullYear()
     }
 
-
     // Actual new methods of IDate
     toFirstDayOfTheWeek() {
         this.date.setHours(-24 * this.date.getDay())
@@ -46,7 +42,7 @@ export default class MenuDate extends Date {
 
     getDateWeek() {
         var onejan = new Date(this.getFullYear(), 0, 1)
-        return Math.ceil((((this.date - onejan) / 86400000) + onejan.getDay() + 1) / 7)
+        return Math.ceil(((this.date - onejan) / 86400000 + onejan.getDay() + 1) / 7)
     }
 
     nextDateWeek() {
@@ -67,16 +63,24 @@ export default class MenuDate extends Date {
     }
 
     getNth() {
-        if(this.getDate()>3 && this.getDate()<21) return 'th'
+        if (this.getDate() > 3 && this.getDate() < 21) return 'th'
         switch (this.getDate() % 10) {
-            case 1:  return "st"
-            case 2:  return "nd"
-            case 3:  return "rd"
-            default: return "th"
+            case 1:
+                return 'st'
+            case 2:
+                return 'nd'
+            case 3:
+                return 'rd'
+            default:
+                return 'th'
         }
     }
 
     formatText() {
         return `${this.getDayText()} ${this.getDate()}${this.getNth()} ${this.getMonthText()}`
+    }
+
+    isBefore(menudate) {
+        return this.getDateWeek() < menudate.getDateWeek() || this.getFullYear() < menudate.getFullYear()
     }
 }

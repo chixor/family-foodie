@@ -1,11 +1,10 @@
 export default class Auth {
-
     /**
      * Authenticate a user. Save a token string in Local Storage
      *
      * @param {string} token
      */
-    static authenticateUser(token,user) {
+    static authenticateUser(token, user) {
         localStorage.setItem('token', token.id_token)
         localStorage.setItem('username', user.name)
         localStorage.setItem('useremail', user.email)
@@ -57,5 +56,4 @@ export default class Auth {
     static getUserImg() {
         return localStorage.getItem('userimg')
     }
-
 }

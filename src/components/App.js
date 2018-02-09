@@ -14,18 +14,20 @@ export default class App extends Component {
         return (
             <BrowserRouter>
                 <div>
-                    <NotificationContainer/>
+                    <NotificationContainer />
                     <Nav />
                     <div className="container-fluid">
                         <Switch>
-                            <Route exact path='/' component={Planner} />
-                            <Route exact path='/shopping' component={Shopping} />
-                            <Route path='/shopping/:year/:week' component={Shopping} />
-                            <Route path='/recipes' component={Recipes} />
-                            <Route path='/recipe/:recipeId' component={RecipeDetails} />
-                            <Route render={function () {
-                                return <p>Not Found</p>
-                            }} />
+                            <Route exact path="/" component={Planner} />
+                            <Route exact path="/shopping" component={Shopping} />
+                            <Route path="/shopping/:year/:week" component={Shopping} />
+                            <Route path="/recipes" component={Recipes} />
+                            <Route path="/recipe/:recipeId" component={RecipeDetails} />
+                            <Route
+                                render={function() {
+                                    return <p>Not Found</p>
+                                }}
+                            />
                         </Switch>
                     </div>
                 </div>

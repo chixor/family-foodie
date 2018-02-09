@@ -5,9 +5,9 @@ import Auth from '../utils/Auth'
 
 export default class Nav extends Component {
     login(response) {
-        typeof response.error !== 'undefined' ?
-            NotificationManager.error(response.error):
-            Auth.authenticateUser(response.tokenObj,response.profileObj)
+        typeof response.error !== 'undefined'
+            ? NotificationManager.error(response.error)
+            : Auth.authenticateUser(response.tokenObj, response.profileObj)
 
         this.setState({ isAuthenticated: true })
     }
@@ -23,29 +23,56 @@ export default class Nav extends Component {
                 <nav className="navbar navbar-inverse">
                     <div className="container-fluid">
                         <div className="navbar-header">
-                            <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                            <button
+                                type="button"
+                                className="navbar-toggle collapsed"
+                                data-toggle="collapse"
+                                data-target="#bs-example-navbar-collapse-1"
+                                aria-expanded="false"
+                            >
                                 <span className="sr-only">Toggle navigation</span>
-                                <span className="icon-bar"></span>
-                                <span className="icon-bar"></span>
-                                <span className="icon-bar"></span>
+                                <span className="icon-bar" />
+                                <span className="icon-bar" />
+                                <span className="icon-bar" />
                             </button>
                             <a className="navbar-brand" href="#">
-                                <img alt="logo" src="/static/favicon.png"/>
+                                <img alt="logo" src="/static/favicon.png" />
                                 Family Foodie
                             </a>
                         </div>
 
                         <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul className="nav navbar-nav">
-                                <li><NavLink exact activeClassName='active' to='/'>Planner</NavLink></li>
-                                <li><NavLink activeClassName='active' to="/shopping">Shopping</NavLink></li>
-                                <li><NavLink activeClassName='active' to="/recipes">Recipes</NavLink></li>
+                                <li>
+                                    <NavLink exact activeClassName="active" to="/">
+                                        Planner
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink activeClassName="active" to="/shopping">
+                                        Shopping
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink activeClassName="active" to="/recipes">
+                                        Recipes
+                                    </NavLink>
+                                </li>
                             </ul>
                             <div className="nav navbar-nav navbar-right">
-                                <a href="/accounts/logout" className="btn btn-success navbar-btn">Logout</a>
+                                <a href="/accounts/logout" className="btn btn-success navbar-btn">
+                                    Logout
+                                </a>
                             </div>
                             <ul className="nav navbar-nav navbar-right">
-                                <li><a target="_blank" href="http://seasonalfoodguide.com/melbourne-victoria-seasonal-fresh-produce-guide-fruits-vegetables-in-season-availability-australia.html">Melbourne Seasonal Food Guide</a></li>
+                                <li>
+                                    <a
+                                        target="_blank"
+                                        href="http://seasonalfoodguide.com/melbourne-victoria-seasonal-fresh-produce-guide-fruits-vegetables-in-season-availability-australia.html"
+                                    >
+                                        Melbourne Seasonal Food Guide
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>
