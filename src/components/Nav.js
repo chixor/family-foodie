@@ -9,16 +9,12 @@ export default class Nav extends Component {
             NotificationManager.error(response.error):
             Auth.authenticateUser(response.tokenObj,response.profileObj)
 
-        this.setState(prevState => {
-            return prevState.isAuthenticated = true
-        })
+        this.setState({ isAuthenticated: true })
     }
 
     logout() {
         Auth.deauthenticateUser()
-        this.setState(prevState => {
-            return prevState.isAuthenticated = false
-        })
+        this.setState({ isAuthenticated: false })
     }
 
     render() {

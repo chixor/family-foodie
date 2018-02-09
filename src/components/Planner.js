@@ -123,14 +123,9 @@ export default class Planner extends Component {
     }
 
     chooseRecipes = (howMany) => {
-        var randomSelection = []
-
-        if(this.state.recipes.length > 0) {
-            for(let x=0; x<howMany; x++) {
-                randomSelection.push(this.chooseRecipe())
-            }
-        }
-        return randomSelection
+      return this.state.recipes.length > 0
+        ? Array.from({length: howMany}, () => this.chooseRecipe())
+        : []
     }
 
     /**
@@ -139,10 +134,9 @@ export default class Planner extends Component {
 
     randomizeAll = (index) => {
       this.getRecipesForRandomisation()
-      this.setState(prevState => {
-        prevState.weeks[index].recipes = this.chooseRecipes(prevState.weeks[index].recipes.length || 3)
-        return prevState
-      })
+      let weeks = this.state.weeks
+      weeks[index].recipes = this.chooseRecipes(weeks[index].recipes.length || 3)
+      this.setState({ weeks })
     }
 
     addWeek = (week, year) => {
