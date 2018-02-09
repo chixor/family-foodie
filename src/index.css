@@ -211,9 +211,9 @@ h4.shopping-week {
 .container-archiveweek h4 {
   margin-bottom: 5pt;
 }
-.container-archiveweek:nth-child(3n-1) {
+.container-archiveweek:nth-of-type(3n-1) {
   clear: right;
 }
-.container-archiveweek:nth-child(3n-3) {
+.container-archiveweek:nth-of-type(3n-3) {
   clear: left;
 }

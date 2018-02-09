@@ -254,12 +254,13 @@ export default class Planner extends Component {
                         this.state.weeks.map((w, i) => (
                             <section
                                 className={
-                                    this.state.thisWeek.getWeek() == w.week && this.state.thisWeek.getYear() == w.year
-                                        ? 'planner-week container-thisweek'
+                                    'planner-week ' +
+                                    (this.state.thisWeek.getWeek() == w.week && this.state.thisWeek.getYear() == w.year
+                                        ? 'container-thisweek'
                                         : w.week < this.state.thisWeek.getWeek() ||
                                           w.year < this.state.thisWeek.getYear()
-                                          ? 'planner-week container-archiveweek'
-                                          : 'planner-week'
+                                          ? 'container-archiveweek'
+                                          : '')
                                 }
                                 key={`week-${w.week}-${w.year}`}
                             >
