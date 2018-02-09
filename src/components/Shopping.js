@@ -23,8 +23,8 @@ export default class Shopping extends Component {
     componentDidMount() {
       const { week, year } = this.props.match.params
       if(week && year) {
-        this.firstDay = new MenuDate(year,0,(1 + (parseInt(week) - 1) * 7)).toFirstDayOfTheWeek()
-        this.lastDay = new MenuDate(year,0,(1 + (parseInt(week) - 1) * 7)).toLastDayOfTheWeek()
+        this.firstDay = new MenuDate(year, week).toFirstDayOfTheWeek()
+        this.lastDay = new MenuDate(year, week).toLastDayOfTheWeek()
         this.datestamp = { week, year }
       }
 

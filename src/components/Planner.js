@@ -31,8 +31,8 @@ export default class Planner extends Component {
         year: year,
         recipes: this.chooseRecipes(3),
         unsaved: true,
-        firstDay: new MenuDate(year,0,(1 + (parseInt(week) - 1) * 7)).toFirstDayOfTheWeek(),
-        lastDay: new MenuDate(year,0,(1 + (parseInt(week) - 1) * 7)).toLastDayOfTheWeek()
+        firstDay: new MenuDate(year, week).toFirstDayOfTheWeek(),
+        lastDay: new MenuDate(year, week).toLastDayOfTheWeek()
       }
     }
 
@@ -41,11 +41,10 @@ export default class Planner extends Component {
             if(weeks.length === 0 || (weeks.length > 0 && (parseInt(weeks[0].week,10) < this.state.thisWeek.getDateWeek() || parseInt(weeks[0].year,10) < this.state.thisWeek.getFullYear()))) {
                 weeks.unshift(this.newWeekObject(this.state.thisWeek.getDateWeek(), this.state.thisWeek.getFullYear()))
             }
-            let daysToWeek = (1 + (weeks[0].week - 1) * 7)
-            const nextWeek = new MenuDate(weeks[0].year,0,daysToWeek).nextDateWeek()
+            const nextWeek = new MenuDate(weeks[0].year, weeks[0].week).nextDateWeek()
             weeks.forEach((w) => {
-              w.firstDay = new MenuDate(w.year,0,(1 + (parseInt(w.week) - 1) * 7)).toFirstDayOfTheWeek()
-              w.lastDay = new MenuDate(w.year,0,(1 + (parseInt(w.week) - 1) * 7)).toLastDayOfTheWeek()
+              w.firstDay = new MenuDate(w.year, w.week).toFirstDayOfTheWeek()
+              w.lastDay = new MenuDate(w.year, w.week).toLastDayOfTheWeek()
             })
             this.setState({ weeks, nextWeek })
         })
@@ -175,7 +174,7 @@ export default class Planner extends Component {
       api.deleteWeek(this.state.weeks[index]).then(() => {
         let weeks = this.state.weeks
         weeks.splice(index, 1)
-        const nextWeek = new MenuDate(weeks[0].year, 0, (1 + (weeks[0].week - 1) * 7)).nextDateWeek()
+        const nextWeek = new MenuDate(weeks[0].year, weeks[0].week).nextDateWeek()
         this.setState({ weeks, nextWeek })
       })
     }
@@ -189,7 +188,7 @@ export default class Planner extends Component {
       }
       else {
         weeks.splice(index, 1)
-        const nextWeek = new MenuDate(weeks[0].year, 0, (1 + (weeks[0].week - 1) * 7)).nextDateWeek()
+        const nextWeek = new MenuDate(weeks[0].year, weeks[0].week).nextDateWeek()
       }
       this.setState({ weeks, nextWeek })
     }

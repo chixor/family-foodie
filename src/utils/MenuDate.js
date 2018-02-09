@@ -1,9 +1,9 @@
 export default class MenuDate extends Date {
-    constructor(year,month,day) {
+    constructor(year, week) {
         super()
-        this.date = (typeof year !== 'undefined') ?
-            new Date(year,month,day):
-            new Date()
+        this.date = (typeof year !== 'undefined')
+            ? new Date(year, 0, (1 + (parseInt(week) - 1) * 7))
+            : new Date()
 
         return this
     }
