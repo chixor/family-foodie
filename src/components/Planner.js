@@ -36,7 +36,7 @@ export default class Planner extends Component {
       }
     }
 
-    getWeeks() {
+    getWeeks = () => {
         api.getWeeks().then((weeks) => {
             if(weeks.length === 0 || (weeks.length > 0 && (parseInt(weeks[0].week,10) < this.state.thisWeek.getDateWeek() || parseInt(weeks[0].year,10) < this.state.thisWeek.getFullYear()))) {
                 weeks.unshift(this.newWeekObject(this.state.thisWeek.getDateWeek(), this.state.thisWeek.getFullYear()))
@@ -51,7 +51,7 @@ export default class Planner extends Component {
         })
     }
 
-    getRecipes() {
+    getRecipes = () => {
         api.getRecipes().then((recipes) => {
             this.setState({ recipes })
         })
@@ -214,13 +214,13 @@ export default class Planner extends Component {
       this.setState({ weeks })
     }
 
-    addOne(index) {
+    addOne = (index) => {
       let weeks = this.state.weeks
       weeks[index].recipes.push(this.chooseRecipe())
       this.setState({ weeks })
     }
 
-    addSearchOne(index, recipe) {
+    addSearchOne = (index, recipe) => {
       let { searchResults, weeks } = this.state
 
       this.refs.searchQuery.value = ''
@@ -229,13 +229,13 @@ export default class Planner extends Component {
       this.setState({ weeks, searchResults })
     }
 
-    deleteOne(index, place) {
+    deleteOne = (index, place) => {
       let weeks = this.state.weeks
       weeks[index].recipes.splice(place, 1)
       this.setState({ weeks })
     }
 
-    searchInput(value) {
+    searchInput = (value) => {
         let searchResults = []
 
         if(value.length > 0) {
