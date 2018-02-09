@@ -79,7 +79,11 @@ export default class Shopping extends Component {
       drag.toList = toList
 
       var ingredients = this.state.ingredients
-      ['fresh','pantry'].forEach((i) => {ingredients[i].map((r) => {r.dragover = false})})
+      Object.keys(ingredients).forEach((key) => {
+        ingredients[key].forEach((ingredient) => {
+          ingredient.dragover = false
+        })
+      })
       ingredients[toList][toIndex].dragover = true
 
       this.setState({ ingredients, drag })
@@ -87,7 +91,11 @@ export default class Shopping extends Component {
 
     drop = () => {
       var ingredients = this.state.ingredients, drag = this.state.drag, cost
-      ['fresh','pantry'].forEach((i) => {ingredients[i].map((r) => {r.dragover = false})})
+      Object.keys(ingredients).forEach((key) => {
+        ingredients[key].forEach((ingredient) => {
+          ingredient.dragover = false
+        })
+      })
 
       if(!drag.ingredient.ingredientId && drag.toList === 'pantry') {
         this.setState({ drag: undefined })
