@@ -280,18 +280,18 @@ export default class Planner extends Component {
                                 {w.unsaved ? (
                                     <div className="planner-controls">
                                         &nbsp;<button
-                                            className="btn btn-sm btn-default"
+                                            className="btn btn-xs btn-default"
                                             onClick={() => this.randomizeAll(i)}
                                         >
                                             <span className="glyphicon glyphicon-refresh" /> Randomize
                                         </button>
-                                        &nbsp;<button className="btn btn-sm btn-success" onClick={() => this.save(i)}>
+                                        &nbsp;<button className="btn btn-xs btn-success" onClick={() => this.save(i)}>
                                             <span className="glyphicon glyphicon-ok" /> Save
                                         </button>
-                                        &nbsp;<button className="btn btn-sm btn-danger" onClick={() => this.delete(i)}>
+                                        &nbsp;<button className="btn btn-xs btn-danger" onClick={() => this.delete(i)}>
                                             <span className="glyphicon glyphicon-remove" /> Delete
                                         </button>
-                                        &nbsp;<button className="btn btn-sm btn-default" onClick={() => this.cancel(i)}>
+                                        &nbsp;<button className="btn btn-xs btn-default" onClick={() => this.cancel(i)}>
                                             <span className="glyphicon glyphicon-remove" /> Cancel
                                         </button>
                                     </div>
@@ -300,7 +300,7 @@ export default class Planner extends Component {
                                     <div className="planner-controls">
                                         &nbsp;<button
                                             title="Edit"
-                                            className="btn btn-sm btn-default"
+                                            className="btn btn-xs btn-default"
                                             onClick={() => this.edit(i)}
                                         >
                                             <span className="glyphicon glyphicon-pencil" />
@@ -308,7 +308,7 @@ export default class Planner extends Component {
                                         &nbsp;<a
                                             title="Shopping List"
                                             href={`/shopping/${w.year}/${w.week}`}
-                                            className="btn btn-sm btn-default"
+                                            className="btn btn-xs btn-default"
                                         >
                                             <span className="glyphicon glyphicon-list" />
                                         </a>

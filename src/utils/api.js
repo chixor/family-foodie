@@ -55,9 +55,19 @@ export default {
 
     deleteRecipeIngredients: function(id) {
         return axios
-            .put(`${BASEURL}/recipe/${id}/ingredients/`)
+            .delete(`${BASEURL}/recipe/${id}/ingredients/`)
             .then(function(response) {
                 NotificationManager.success('Recipe ingredients deleted successfully')
+                return response.data.result
+            })
+            .catch(handleError)
+    },
+
+    deleteRecipeIngredient: function(recipe, ingredient) {
+        return axios
+            .delete(`${BASEURL}/recipe/${recipe}/ingredient/${ingredient}/`)
+            .then(function(response) {
+                NotificationManager.success('Recipe ingredient deleted successfully')
                 return response.data.result
             })
             .catch(handleError)

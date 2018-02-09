@@ -16,6 +16,7 @@ export default class RecipeDetails extends Component {
             four: new Map(),
             measurement: new Map(),
             ingredient: new Map(),
+            recipeIngredientId: new Map(),
             fresh: new Map()
         }
     }
@@ -92,10 +93,12 @@ export default class RecipeDetails extends Component {
         this.setState({ recipeIngredients })
     }
 
-    deleteIngredient(i) {
+    deleteIngredient(i, id) {
         let recipeIngredients = this.state.recipeIngredients
         recipeIngredients.splice(i, 1)
-        this.setState({ recipeIngredients })
+        api.deleteRecipeIngredient(this.props.match.params.recipeId, id).then(() => {
+            this.setState({ recipeIngredients })
+        })
     }
 
     render() {
@@ -233,6 +236,12 @@ export default class RecipeDetails extends Component {
                                                         id="ingredient"
                                                         placeholder="Ingredient"
                                                     />
+                                                    <input
+                                                        defaultValue={r.id}
+                                                        ref={c => this.form.recipeIngredientId.set(i, c)}
+                                                        type="hidden"
+                                                        id="recipeIngredientId"
+                                                    />
                                                 </td>
                                                 <td className="form-group">
                                                     <label>
@@ -246,7 +255,7 @@ export default class RecipeDetails extends Component {
                                                 </td>
                                                 <td>
                                                     <button
-                                                        onClick={() => this.deleteIngredient(i)}
+                                                        onClick={() => this.deleteIngredient(i, r.id)}
                                                         className="btn btn-danger"
                                                     >
                                                         <span className="glyphicon glyphicon-remove" />

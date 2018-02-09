@@ -53,9 +53,20 @@ def RecipeDetail(request,pk):
     return JsonResponse(dict(result=list(recipes)))
 
 @return_403
+def RecipeIngredient(request,pk,ingredient):
+    if request.method=='DELETE':
+        ing = RecipeIngredients.objects.get(recipe=pk,id=ingredient).ingredient_id
+        RecipeIngredients.objects.filter(recipe=pk,id=ingredient).delete()
+        Ingredients.objects.filter(id=ing).delete()
+
+    response = HttpResponse()
+    response['allow'] = "delete, options"
+    return response
+
+@return_403
 def RecipeIngredientsList(request,pk):
     if request.method=='GET':
-        ingredients = RecipeIngredients.objects.filter(recipe=pk).values('recipe','ingredient','quantity','quantity4','quantityMeasure')
+        ingredients = RecipeIngredients.objects.filter(recipe=pk).values('recipe','ingredient','quantity','quantity4','quantityMeasure','id')
         for ing in ingredients:
             ing['quantityMeasure'] = Measure.objects.get(id=ing['quantityMeasure']).name
             ingobj = Ingredients.objects.get(id=ing['ingredient'])
@@ -65,7 +76,6 @@ def RecipeIngredientsList(request,pk):
         return JsonResponse(dict(result=list(ingredients)))
 
     if request.method=='PUT':
-        RecipeIngredients.objects.filter(recipe=pk).delete()
         body = json.loads(request.body)
         for ingredient in body['data']['ingredients']:
             rea = Recipe.objects.get(id=pk)
@@ -76,7 +86,10 @@ def RecipeIngredientsList(request,pk):
             except ObjectDoesNotExist:
                 ing = Ingredients.objects.create(name=ingredient['ingredient'],fresh=ingredient['fresh'])
             mea = Measure.objects.get(name=ingredient['measurement'])
-            RecipeIngredients.objects.create(recipe=rea,quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
+            if 'recipeIngredientId' in ingredient and ingredient['recipeIngredientId']:
+                RecipeIngredients.objects.filter(id=ingredient['recipeIngredientId']).update(quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
+            else:
+                RecipeIngredients.objects.create(recipe=rea,quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
 
     if request.method=='DELETE':
         RecipeIngredients.objects.filter(recipe=pk).delete()
