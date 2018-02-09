@@ -15,8 +15,8 @@ export default class Shopping extends Component {
         this.firstDay = new MenuDate().toFirstDayOfTheWeek()
         this.lastDay = new MenuDate().toLastDayOfTheWeek()
         this.datestamp = {
-            week: this.firstDay.getDateWeek(),
-            year: this.firstDay.getFullYear()
+            week: this.firstDay.getWeek(),
+            year: this.firstDay.getYear()
         }
     }
 

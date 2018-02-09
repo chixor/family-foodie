@@ -25,10 +25,6 @@ export default class MenuDate extends Date {
         return this.date.getMonth()
     }
 
-    getFullYear() {
-        return this.date.getFullYear()
-    }
-
     // Actual new methods of IDate
     toFirstDayOfTheWeek() {
         this.date.setHours(-24 * this.date.getDay())
@@ -40,12 +36,16 @@ export default class MenuDate extends Date {
         return this
     }
 
-    getDateWeek() {
-        var onejan = new Date(this.getFullYear(), 0, 1)
+    getWeek() {
+        var onejan = new Date(this.getYear(), 0, 1)
         return Math.ceil(((this.date - onejan) / 86400000 + onejan.getDay() + 1) / 7)
     }
 
-    nextDateWeek() {
+    getYear() {
+        return this.date.getFullYear()
+    }
+
+    nextWeek() {
         var t = this.date.getTime()
         t += 7 * 86400000
         this.date.setTime(t)
@@ -81,6 +81,6 @@ export default class MenuDate extends Date {
     }
 
     isBefore(menudate) {
-        return this.getDateWeek() < menudate.getDateWeek() || this.getFullYear() < menudate.getFullYear()
+        return this.getWeek() < menudate.getWeek() || this.getYear() < menudate.getYear()
     }
 }
