@@ -37,8 +37,16 @@ export default class MenuDate extends Date {
     }
 
     getWeek() {
-        var onejan = new Date(this.getYear(), 0, 1)
-        return Math.ceil(((this.date - onejan) / 86400000 + onejan.getDay() + 1) / 7)
+        // Copy date so don't modify original
+        let d = new Date(Date.UTC(this.date.getFullYear(), this.date.getMonth(), this.date.getDate()))
+        // Set to nearest Thursday: current date + 4 - current day number
+        d.setUTCDate(d.getUTCDate() + 4 - d.getUTCDay())
+        // Get first day of year
+        var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+        // Calculate full weeks to nearest Thursday
+        var weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7)
+        // Return array of year and week number
+        return weekNo
     }
 
     getYear() {
