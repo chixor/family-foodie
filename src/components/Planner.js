@@ -31,8 +31,7 @@ export default class Planner extends Component {
             year: year,
             recipes: this.chooseRecipes(3),
             unsaved: true,
-            firstDay: new MenuDate(year, week).toFirstDayOfTheWeek(),
-            lastDay: new MenuDate(year, week).toLastDayOfTheWeek()
+            date: new MenuDate(year, week)
         }
     }
 
@@ -44,8 +43,7 @@ export default class Planner extends Component {
             }
             const nextWeek = new MenuDate(weeks[0].year, weeks[0].week).nextWeek()
             weeks.forEach(w => {
-                w.firstDay = new MenuDate(w.year, w.week).toFirstDayOfTheWeek()
-                w.lastDay = new MenuDate(w.year, w.week).toLastDayOfTheWeek()
+                w.date = new MenuDate(w.year, w.week)
             })
             this.setState({ weeks, nextWeek })
         })
@@ -256,7 +254,14 @@ export default class Planner extends Component {
                     <br />
                     {this.state.weeks.length > 0 &&
                         this.state.weeks.map((w, i) => (
-                            <div key={`week-${w.week}-${w.year}`}>
+                            <section
+                                className={
+                                    this.state.thisWeek.getWeek() == w.week && this.state.thisWeek.getYear() == w.year
+                                        ? 'container-thisweek'
+                                        : ''
+                                }
+                                key={`week-${w.week}-${w.year}`}
+                            >
                                 <h2 className="shopping-week">
                                     Week {w.week}, {w.year}
                                     {w.unsaved ? (
@@ -313,9 +318,10 @@ export default class Planner extends Component {
                                     ) : null}
                                 </h2>
                                 <h4 className="shopping-week">
-                                    {w.firstDay.formatText()} ↣ {w.lastDay.formatText()}
+                                    {w.date.toFirstDayOfTheWeek().formatText()} ↣&nbsp;
+                                    {w.date.toLastDayOfTheWeek().formatText()}
                                 </h4>
-                                <section className={w.unsaved ? 'unsaved weeklist recipelist' : 'weeklist recipelist'}>
+                                <div className={w.unsaved ? 'unsaved weeklist recipelist' : 'weeklist recipelist'}>
                                     {w.recipes.length
                                         ? w.unsaved
                                           ? w.recipes.map((r, x) => (
@@ -375,8 +381,8 @@ export default class Planner extends Component {
                                             </div>
                                         </article>
                                     ) : null}
-                                </section>
-                            </div>
+                                </div>
+                            </section>
                         ))}
                 </div>
             </div>
