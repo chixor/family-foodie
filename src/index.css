@@ -3,7 +3,7 @@ body {
   background: #eee;
 }
 h2 {
-  font-size: 26px;
+  font-size: 186%;
   /*font-family: Georgia, sans;*/
 }
 h2 button {
@@ -132,7 +132,8 @@ h4.shopping-week {
   background: #5cb85c;
   color: #fff;
   line-height: 1;
-  font-size: 78%;
+  top: -3px;
+  font-size: 65%;
   font-family: "Nobel-RM", sans-serif;
 }
 .pricetag:before {
@@ -162,6 +163,7 @@ h4.shopping-week {
   position: absolute;
   top: 253px;
   right: 6px;
+  font-size: 80%;
 }
 .table-column-tiny {
   width: 1% !important;
@@ -173,9 +175,45 @@ h4.shopping-week {
   padding-left: 6px !important;
 }
 .container-thisweek {
-  background-color: #ccc;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.2) 0.5%,rgba(0,0,0,0.1) 40%);
   margin: 0 -11pt;
   padding: 0 11pt;
   padding-top: 4pt;
   margin-bottom: 11pt;
+}
+.planner-week {
+  position: relative;
+  text-align: center;
+}
+.planner-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 170%;
+}
+.planner-addweek {
+  position:absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 99;
+}
+.container-archiveweek {
+  width: 33%;
+  float: left;
+  font-size: 80%;
+  text-align: left;
+}
+.container-archiveweek .planner-controls {
+  position: static;
+  font-size: 100%;
+  height: 44px;
+}
+.container-archiveweek h4 {
+  margin-bottom: 5pt;
+}
+.container-archiveweek:nth-child(3n-1) {
+  clear: right;
+}
+.container-archiveweek:nth-child(3n-3) {
+  clear: left;
 }

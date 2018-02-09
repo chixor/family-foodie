@@ -45,9 +45,10 @@ export default class Recipe extends Component {
                     <img className="heroimage" alt="thumbnail" src={`/assets/resources/${this.props.front}.jpg`} />
                 </NavLink>
                 <h3>{this.props.name}</h3>
-                <p>
-                    <span className="glyphicon glyphicon-time" /> {this.props.prepTime + this.props.cookTime}min{cost}
+                <p className="preptime">
+                    <span className="glyphicon glyphicon-time" /> {this.props.prepTime + this.props.cookTime}min
                 </p>
+                {cost}
             </article>
         )
     }

@@ -245,75 +245,30 @@ export default class Planner extends Component {
             <div className="row">
                 <div className="col-md-12">
                     <button
-                        className="btn btn-default"
+                        className="btn btn-default planner-addweek"
                         onClick={() => this.addWeek(this.state.nextWeek.getWeek(), this.state.nextWeek.getYear())}
                     >
                         <span className="glyphicon glyphicon-plus" /> Week {this.state.nextWeek.getWeek()}
                     </button>
-                    <br />
-                    <br />
                     {this.state.weeks.length > 0 &&
                         this.state.weeks.map((w, i) => (
                             <section
                                 className={
                                     this.state.thisWeek.getWeek() == w.week && this.state.thisWeek.getYear() == w.year
-                                        ? 'container-thisweek'
-                                        : ''
+                                        ? 'planner-week container-thisweek'
+                                        : w.week < this.state.thisWeek.getWeek() ||
+                                          w.year < this.state.thisWeek.getYear()
+                                          ? 'planner-week container-archiveweek'
+                                          : 'planner-week'
                                 }
                                 key={`week-${w.week}-${w.year}`}
                             >
                                 <h2 className="shopping-week">
                                     Week {w.week}, {w.year}
-                                    {w.unsaved ? (
-                                        <span>
-                                            &nbsp;<button
-                                                className="btn btn-sm btn-default"
-                                                onClick={() => this.randomizeAll(i)}
-                                            >
-                                                <span className="glyphicon glyphicon-refresh" /> Randomize
-                                            </button>
-                                            &nbsp;<button
-                                                className="btn btn-sm btn-success"
-                                                onClick={() => this.save(i)}
-                                            >
-                                                <span className="glyphicon glyphicon-ok" /> Save
-                                            </button>
-                                            &nbsp;<button
-                                                className="btn btn-sm btn-danger"
-                                                onClick={() => this.delete(i)}
-                                            >
-                                                <span className="glyphicon glyphicon-remove" /> Delete
-                                            </button>
-                                            &nbsp;<button
-                                                className="btn btn-sm btn-default"
-                                                onClick={() => this.cancel(i)}
-                                            >
-                                                <span className="glyphicon glyphicon-remove" /> Cancel
-                                            </button>
-                                        </span>
-                                    ) : null}
-                                    {!w.unsaved ? (
-                                        <span>
-                                            &nbsp;<button
-                                                title="Edit"
-                                                className="btn btn-sm btn-default"
-                                                onClick={() => this.edit(i)}
-                                            >
-                                                <span className="glyphicon glyphicon-pencil" />
-                                            </button>
-                                            &nbsp;<a
-                                                title="Shopping List"
-                                                href={`/shopping/${w.year}/${w.week}`}
-                                                className="btn btn-sm btn-default"
-                                            >
-                                                <span className="glyphicon glyphicon-list" />
-                                            </a>
-                                            {w.cost ? (
-                                                <span className="pricetag">
-                                                    <sup>$</sup>
-                                                    {w.cost.toFixed(2)}
-                                                </span>
-                                            ) : null}
+                                    {w.cost ? (
+                                        <span className="pricetag">
+                                            <sup>$</sup>
+                                            {w.cost.toFixed(2)}
                                         </span>
                                     ) : null}
                                 </h2>
@@ -321,6 +276,43 @@ export default class Planner extends Component {
                                     {w.date.toFirstDayOfTheWeek().formatText()} ↣&nbsp;
                                     {w.date.toLastDayOfTheWeek().formatText()}
                                 </h4>
+                                {w.unsaved ? (
+                                    <div className="planner-controls">
+                                        &nbsp;<button
+                                            className="btn btn-sm btn-default"
+                                            onClick={() => this.randomizeAll(i)}
+                                        >
+                                            <span className="glyphicon glyphicon-refresh" /> Randomize
+                                        </button>
+                                        &nbsp;<button className="btn btn-sm btn-success" onClick={() => this.save(i)}>
+                                            <span className="glyphicon glyphicon-ok" /> Save
+                                        </button>
+                                        &nbsp;<button className="btn btn-sm btn-danger" onClick={() => this.delete(i)}>
+                                            <span className="glyphicon glyphicon-remove" /> Delete
+                                        </button>
+                                        &nbsp;<button className="btn btn-sm btn-default" onClick={() => this.cancel(i)}>
+                                            <span className="glyphicon glyphicon-remove" /> Cancel
+                                        </button>
+                                    </div>
+                                ) : null}
+                                {!w.unsaved ? (
+                                    <div className="planner-controls">
+                                        &nbsp;<button
+                                            title="Edit"
+                                            className="btn btn-sm btn-default"
+                                            onClick={() => this.edit(i)}
+                                        >
+                                            <span className="glyphicon glyphicon-pencil" />
+                                        </button>
+                                        &nbsp;<a
+                                            title="Shopping List"
+                                            href={`/shopping/${w.year}/${w.week}`}
+                                            className="btn btn-sm btn-default"
+                                        >
+                                            <span className="glyphicon glyphicon-list" />
+                                        </a>
+                                    </div>
+                                ) : null}
                                 <div className={w.unsaved ? 'unsaved weeklist recipelist' : 'weeklist recipelist'}>
                                     {w.recipes.length
                                         ? w.unsaved

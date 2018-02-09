@@ -15,7 +15,8 @@
   cursor: pointer;
 }
 .navbar {
-  border-radius: 0px; }
+  border-radius: 0px;
+  margin-bottom: 0px;}
 
 .navbar-brand img {
   width: 20px;
@@ -85,6 +86,29 @@
   top: 20px;
   transform: rotate(45deg); }
 
+.container-archiveweek .corner-triangle-left,
+.container-archiveweek .corner-triangle-right {
+  border-width: 0 0 45px 45px;
+  width: 45px;
+  height: 45px;
+}
+
+.container-archiveweek .corner-triangle-right {
+  border-width: 0 45px 45px 0;
+}
+
+.container-archiveweek .corner-triangle-left .glyphicon,
+  .container-archiveweek .corner-triangle-right .glyphicon {
+  font-size: 120%;
+  top: 7px;
+  left: -38px;
+}
+
+.container-archiveweek .corner-triangle-right .glyphicon {
+  left: auto;
+  right: -38px;
+}
+
 .recipe-search {
   padding: 0; }
 
@@ -132,7 +156,8 @@
   margin: 6pt;
   width: 310px;
   box-sizing: border-box;
-  height: 380px; }
+  height: 380px;
+  text-align: left; }
 
 .recipedetail {
   padding: 0 18px 10pt 14pt; }
@@ -180,6 +205,35 @@
   line-height: 1;
   margin-left: -24px;
   margin-top: -40px; }
+
+.container-archiveweek .recipelist {
+  width: 100%;
+}
+
+.container-archiveweek .recipelist article {
+  height: auto;
+  margin: 1pt;
+  width: 100%;
+}
+
+.container-archiveweek .recipelist article .heroimage {
+  height: 50px;
+  float: left;
+  padding-right: 6pt;
+  margin: 0;
+  min-height: 0;
+  min-width: 0;
+  background-color: transparent;
+}
+
+.container-archiveweek .recipelist article h3 {
+    font-size: 126%;
+    height: auto;
+}
+
+.container-archiveweek .recipelist article .preptime {
+  display: none;
+}
 
 .recipe-detail-card {
   width: 50%; }
