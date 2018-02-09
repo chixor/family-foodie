@@ -13,7 +13,7 @@ h2.shopping-week {
   margin: 10px 0 6px;
 }
 h4.shopping-week {
-  font-size: 140%;
+  font-size: 130%;
   margin: 5px 0 15px;
   font-family: Georgia, sans;
 }
@@ -163,6 +163,12 @@ h4.shopping-week {
   top: 253px;
   right: 6px;
 }
-.column-checkbox {
+.table-column-tiny {
   width: 1% !important;
+}
+.align-center {
+  text-align: center;
+}
+.pad-left {
+  padding-left: 6px !important;
 }

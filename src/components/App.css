@@ -30,7 +30,8 @@
 
 .weeklist {
   border: 5px solid #eee;
-  margin: 0 -13px; }
+  margin: 0 -13px;
+  margin-top: -13px; }
 
 .weeklist input[type="search"] {
   width: calc(100% - 12pt);
@@ -131,7 +132,7 @@
   margin: 6pt;
   width: 310px;
   box-sizing: border-box;
-  height: 370px; }
+  height: 380px; }
 
 .recipedetail {
   padding: 0 18px 10pt 14pt; }
@@ -150,7 +151,7 @@
 .recipelist article h3 {
   padding: 6pt;
   margin: 0;
-  height: 58px;
+  height: 70px;
   font-size: 140%; }
 
 .recipelist article p {

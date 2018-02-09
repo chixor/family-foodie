@@ -1,126 +1,114 @@
-import React, { Component } from "react";
-import api from '../utils/api';
+import React, { Component } from "react"
+import api from '../utils/api'
 
 export default class RecipeDetails extends Component {
     constructor(props) {
-        super();
+        super()
         this.state = {
             recipe: {},
             recipeIngredients: [],
             measurements: [],
             ingredients: [],
             editing: false
-        };
+        }
         this.form = {
             two: new Map(),
             four: new Map(),
             measurement: new Map(),
             ingredient: new Map(),
             fresh: new Map()
-        };
-
-        this.save = this.save.bind(this);
-        this.delete = this.delete.bind(this);
-        this.toggleEdit = this.toggleEdit.bind(this);
+        }
     }
 
     componentDidMount() {
-        this.getRecipe();
-        this.getRecipeIngredients();
-        this.getMeasurements();
+        this.getRecipe()
+        this.getRecipeIngredients()
+        this.getMeasurements()
     }
 
-    save() {
-        var ingredients = [];
+    save = () => {
+        var ingredients = []
         Object.keys(this.form).map(key => {
             Array.from(this.form[key].values())
                 .filter(node => node != null)
                 .forEach((node,index) => {
                     if(typeof ingredients[index] === 'undefined') {
-                        ingredients[index] = {};
+                        ingredients[index] = {}
                     }
-                    ingredients[index][key] = (node.type === 'checkbox') ? node.checked : node.value;
-                });
-            return true;
-        });
+                    ingredients[index][key] = (node.type === 'checkbox') ? node.checked : node.value
+                })
+            return true
+        })
 
         api.saveRecipeIngredients(this.props.match.params.recipeId,ingredients).then(() => {
-            this.getRecipeIngredients();
-            this.toggleEdit();
-        });
+            this.getRecipeIngredients()
+            this.toggleEdit()
+        })
     }
 
-    delete() {
+    delete = () => {
         api.deleteRecipeIngredients(this.props.match.params.recipeId).then(() => {
-            this.toggleEdit();
-        });
+            this.toggleEdit()
+        })
     }
 
-    toggleEdit(index) {
-        this.setState(prevState => {
-            prevState.editing = !prevState.editing;
-            if(prevState.editing && prevState.recipeIngredients.length === 0) {
-                prevState.recipeIngredients.push({},{},{},{},{});
-            }
-            return prevState;
-        });
+    toggleEdit = (index) => {
+        let { editing, recipeIngredients } = this.state
+        editing = !this.state.editing
+
+        if(editing && recipeIngredients.length === 0) {
+          recipeIngredients.push({},{},{},{},{})
+        }
+        this.setState({ editing, recipeIngredients })
     }
 
     getRecipe() {
         api.getRecipe(parseInt(this.props.match.params.recipeId,10)).then((recipe) => {
-            this.setState(prevState => {
-                return { recipe: recipe }
-            });
-        });
+            this.setState({ recipe })
+        })
     }
 
     getRecipeIngredients() {
-        api.getRecipeIngredients(parseInt(this.props.match.params.recipeId,10)).then((ingredients) => {
-            this.setState(prevState => {
-                return { recipeIngredients: ingredients }
-            });
-        });
+        api.getRecipeIngredients(parseInt(this.props.match.params.recipeId,10)).then((recipeIngredients) => {
+            this.setState({ recipeIngredients })
+        })
     }
 
     getMeasurements() {
         api.getMeasurements().then((measurements) => {
-            this.setState(prevState => {
-                return prevState.measurements = measurements;
-            });
-        });
+            this.setState({ measurements })
+        })
     }
 
     getIngredients() {
         api.getIngredients().then((ingredients) => {
-            this.setState(prevState => {
-                return prevState.ingredients = ingredients;
-            });
-        });
+            this.setState({ ingredients })
+        })
     }
 
     addIngredient() {
-        this.setState(prevState => {
-            return prevState.recipeIngredients.push({});
-        });
+        let recipeIngredients = this.state.recipeIngredients
+        recipeIngredients.push({})
+        this.setState({ recipeIngredients })
     }
 
     deleteIngredient(i) {
-        this.setState(prevState => {
-            return prevState.recipeIngredients.splice(i, 1);
-        });
+        let recipeIngredients = this.state.recipeIngredients
+        recipeIngredients.splice(i, 1)
+        this.setState({ recipeIngredients })
     }
 
     render() {
-        var front, back, thumb, pdf;
+        var front, back, thumb, pdf
 
         if(this.state.recipe.front) {
-            pdf = <a href={`/assets/resources/${this.state.recipe.front}.pdf`}>Load PDF File</a>;
-            front = <img alt="front of recipe card" className="recipe-detail-card" src={`/assets/${this.state.recipe.front}.jpg`}/>;
-            thumb = <img alt="thumbnail" className="recipe-thumb" src={`/assets/resources/${this.state.recipe.front}.jpg`}/>;
+            pdf = <a href={`/assets/resources/${this.state.recipe.front}.pdf`}>Load PDF File</a>
+            front = <img alt="front of recipe card" className="recipe-detail-card" src={`/assets/${this.state.recipe.front}.jpg`}/>
+            thumb = <img alt="thumbnail" className="recipe-thumb" src={`/assets/resources/${this.state.recipe.front}.jpg`}/>
         }
 
         if(this.state.recipe.back) {
-            back = <img alt="back of recipe card" className="recipe-detail-card" src={`/assets/${this.state.recipe.back}.jpg`}/>;
+            back = <img alt="back of recipe card" className="recipe-detail-card" src={`/assets/${this.state.recipe.back}.jpg`}/>
         }
 
         return (
@@ -217,6 +205,6 @@ export default class RecipeDetails extends Component {
                 {front}
                 {back}
             </article>
-        );
+        )
     }
 }

@@ -1,24 +1,24 @@
-import React, { Component } from 'react';
-import { NavLink } from 'react-router-dom';
-import { NotificationManager } from 'react-notifications';
-import Auth from '../utils/Auth';
+import React, { Component } from 'react'
+import { NavLink } from 'react-router-dom'
+import { NotificationManager } from 'react-notifications'
+import Auth from '../utils/Auth'
 
 export default class Nav extends Component {
     login(response) {
         typeof response.error !== 'undefined' ?
             NotificationManager.error(response.error):
-            Auth.authenticateUser(response.tokenObj,response.profileObj);
+            Auth.authenticateUser(response.tokenObj,response.profileObj)
 
         this.setState(prevState => {
-            return prevState.isAuthenticated = true;
-        });
+            return prevState.isAuthenticated = true
+        })
     }
 
     logout() {
-        Auth.deauthenticateUser();
+        Auth.deauthenticateUser()
         this.setState(prevState => {
-            return prevState.isAuthenticated = false;
-        });
+            return prevState.isAuthenticated = false
+        })
     }
 
     render() {

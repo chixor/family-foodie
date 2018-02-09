@@ -6,10 +6,10 @@ export default class Auth {
      * @param {string} token
      */
     static authenticateUser(token,user) {
-        localStorage.setItem('token', token.id_token);
-        localStorage.setItem('username', user.name);
-        localStorage.setItem('useremail', user.email);
-        localStorage.setItem('userimg', user.imageUrl);
+        localStorage.setItem('token', token.id_token)
+        localStorage.setItem('username', user.name)
+        localStorage.setItem('useremail', user.email)
+        localStorage.setItem('userimg', user.imageUrl)
     }
 
     /**
@@ -18,7 +18,7 @@ export default class Auth {
      * @returns {boolean}
      */
     static isUserAuthenticated() {
-        return localStorage.getItem('token') !== null;
+        return localStorage.getItem('token') !== null
     }
 
     /**
@@ -26,10 +26,10 @@ export default class Auth {
      *
      */
     static deauthenticateUser() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
-        localStorage.removeItem('useremail');
-        localStorage.removeItem('userimg');
+        localStorage.removeItem('token')
+        localStorage.removeItem('username')
+        localStorage.removeItem('useremail')
+        localStorage.removeItem('userimg')
     }
 
     /**
@@ -39,7 +39,7 @@ export default class Auth {
      */
 
     static getToken() {
-        return localStorage.getItem('token');
+        return localStorage.getItem('token')
     }
 
     /**
@@ -49,13 +49,13 @@ export default class Auth {
      */
 
     static getUserName() {
-        return localStorage.getItem('username');
+        return localStorage.getItem('username')
     }
     static getUserEmail() {
-        return localStorage.getItem('useremail');
+        return localStorage.getItem('useremail')
     }
     static getUserImg() {
-        return localStorage.getItem('userimg');
+        return localStorage.getItem('userimg')
     }
 
 }

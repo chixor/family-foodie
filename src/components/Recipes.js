@@ -1,55 +1,49 @@
-import React, { Component } from "react";
-import api from '../utils/api';
-import search from '../utils/search';
-import Recipe from './Recipe';
+import React, { Component } from "react"
+import api from '../utils/api'
+import search from '../utils/search'
+import Recipe from './Recipe'
+import debounce from 'lodash/debounce'
 
 export default class Recipes extends Component {
 
     constructor(props) {
-        super();
+        super()
         this.state = {
             allRecipes: [],
             showRecipes: []
-        };
-        this.searchInput = search.debounce(this.searchInput,800);
+        }
+        this.searchInput = debounce(this.searchInput,800)
     }
 
     componentDidMount() {
-        this.getRecipes();
-    }
-
-    getRecipes() {
         api.getRecipes().then((recipes) => {
-            this.setState(prevState => {
-                this.refs.searchQuery.value = search.getParameterByName('s',this.props.location.search);
-                prevState.allRecipes = recipes;
-                prevState.showRecipes = this.search(this.refs.searchQuery.value,recipes);
-                return prevState;
-            });
-        });
+            this.refs.searchQuery.value = search.getParameterByName('s',this.props.location.search)
+            let allRecipes = recipes
+            let showRecipes = this.search(this.refs.searchQuery.value,recipes)
+            this.setState({ allRecipes, showRecipes });
+        })
     }
 
-    searchInput(value) {
+    searchInput = (value) => {
         this.props.history.push({
             pathname: '/recipes',
             search: value.length > 0 ? `?s=${value}` : ''
-        });
-        this.setState(prevState => {
-            return prevState.showRecipes = this.search(value);
-        });
+        })
+        const showRecipes = this.search(value)
+        this.setState({ showRecipes })
     }
 
     search(value = '',list) {
-        var recipes = list ? list : this.state.allRecipes;
+        var recipes = list ? list : this.state.allRecipes
         if(value.length > 0) {
-            var split = value.split(/[, ]+/);
-            var query = new RegExp(split.join('|'),'i');
+            var split = value.split(/[, ]+/)
+            var query = new RegExp(split.join('|'),'i')
 
             return recipes.filter(recipe => {
-                return recipe.name.search(query) > -1 || (recipe.description != null && recipe.description.search(query) > -1) || (recipe.ingredients != null && recipe.ingredients.search(query) > -1);
-            });
+                return recipe.name.search(query) > -1 || (recipe.description != null && recipe.description.search(query) > -1) || (recipe.ingredients != null && recipe.ingredients.search(query) > -1)
+            })
         }
-        return recipes;
+        return recipes
     }
 
     render() {
