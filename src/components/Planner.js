@@ -260,7 +260,7 @@ export default class Planner extends Component {
                                         : w.week < this.state.thisWeek.getWeek() ||
                                           w.year < this.state.thisWeek.getYear()
                                           ? 'container-archiveweek'
-                                          : '')
+                                          : 'container-futureweek')
                                 }
                                 key={`week-${w.week}-${w.year}`}
                             >

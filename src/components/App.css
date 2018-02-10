@@ -207,7 +207,9 @@
   margin-top: -40px; }
 
 .container-archiveweek .recipelist {
-  width: 100%;
+  margin: -6px;
+  margin-right: 0px;
+  margin-top: -13px;
 }
 
 .container-archiveweek .recipelist article {
