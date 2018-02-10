@@ -207,17 +207,25 @@
   margin-top: -40px; }
 
 .container-archiveweek .recipelist {
-  margin: -6px;
-  margin-right: 0px;
-  margin-top: -13px;
+  margin: 0;
+  border: 0;
 }
 
 .container-archiveweek .recipelist article {
   height: auto;
-  margin: 1pt;
+  margin: 0;
+  margin-bottom: -3px;
   width: 100%;
+  border-radius: 0;
 }
 
+.container-archiveweek .recipelist article.recipeadd {
+  height: 120px;
+}
+.container-archiveweek .recipelist article.recipeadd:before {
+  bottom: 5px;
+  top: auto;
+}
 .container-archiveweek .recipelist article .heroimage {
   height: 50px;
   float: left;

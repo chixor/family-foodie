@@ -41,7 +41,7 @@ export default class Recipe extends Component {
             <article>
                 {deleteBtn}
                 {randomBtn}
-                <NavLink target="_blank" to={`/recipe/${this.props.id}`}>
+                <NavLink to={`/recipe/${this.props.id}`}>
                     <img className="heroimage" alt="thumbnail" src={`/assets/resources/${this.props.front}.jpg`} />
                 </NavLink>
                 <h3>{this.props.name}</h3>
