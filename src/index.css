@@ -180,7 +180,7 @@ h4.shopping-week {
 }
 .container-thisweek, .container-futureweek {
   margin: 0 -11pt;
-  padding: 11pt;
+  padding: 15pt;
 }
 .planner-week {
   position: relative;
@@ -203,7 +203,7 @@ h4.shopping-week {
   float: left;
   font-size: 80%;
   text-align: left;
-  padding: 0 5px;
+  padding: 8px 5px;
 }
 .container-archiveweek h2 {
   margin-top: 20px;
