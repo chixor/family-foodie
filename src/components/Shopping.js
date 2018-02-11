@@ -213,7 +213,7 @@ export default class Shopping extends Component {
             <div>
                 <div className="row">
                     <div className="col-md-12">
-                        <h2 className="shopping-week">
+                        <h2 className="shopping-week shopping-list">
                             Week {this.datestamp.week}
                             <button className="btn btn-default float-right" onClick={() => this.reset()}>
                                 <span className="glyphicon glyphicon-refresh" /> Reset
@@ -225,7 +225,7 @@ export default class Shopping extends Component {
                     </div>
                 </div>
                 <div className="row">
-                    <div className="col-md-6">
+                    <div className="col-md-6 shopping-list">
                         <div className="recipedetail">
                             <h3>
                                 Shopping List
@@ -361,7 +361,7 @@ export default class Shopping extends Component {
                         </div>
                     </div>
 
-                    <div className="col-md-6">
+                    <div className="col-md-6 pantry">
                         <div className="recipedetail">
                             <h3>Pantry</h3>
                             <table className="table" onDrop={this.drop} onDragOver={this.dragOverTable}>

@@ -12,6 +12,9 @@ h2 button {
 h2.shopping-week {
   margin: 10px 0 6px;
 }
+h2.shopping-list {
+  margin-top: 20pt;
+}
 h4.shopping-week {
   font-size: 130%;
   margin: 5px 0 15px;
@@ -262,5 +265,14 @@ h4.shopping-week {
     left: 50%;
     margin-left: -45px;
     margin-bottom: 20px;
+  }
+}
+
+@media only screen and (min-width: 992px) {
+  .col-md-6.shopping-list {
+    padding-right: 8px;
+  }
+  .col-md-6.pantry {
+    padding-left: 8px;
   }
 }
