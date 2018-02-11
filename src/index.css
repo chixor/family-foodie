@@ -180,8 +180,7 @@ h4.shopping-week {
 }
 .container-thisweek, .container-futureweek {
   margin: 0 -11pt;
-  padding: 0 11pt;
-  padding-top: 4pt;
+  padding: 11pt;
 }
 .planner-week {
   position: relative;
@@ -189,14 +188,14 @@ h4.shopping-week {
 }
 .planner-controls {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 11pt;
+  right: 11pt;
   font-size: 170%;
 }
 .planner-addweek {
   position:absolute;
-  top: 12px;
-  left: 12px;
+  top: 14pt;
+  left: 11pt;
   z-index: 99;
 }
 .container-archiveweek {
@@ -215,21 +214,21 @@ h4.shopping-week {
   margin-bottom: 8px;
   margin-left: -6px;
 }
-.container-archiveweek:nth-of-type(3n-1) {
+.container-archiveweek:nth-of-type(3n+1) {
   clear: right;
   padding-right: 0;
 }
-.container-archiveweek:nth-of-type(3n-3) {
+.container-archiveweek:nth-of-type(3n-1) {
   clear: left;
   padding-left: 0;
 }
 
 @media only screen and (max-width: 992px) {
-  .container-archiveweek:nth-of-type(3n-1) {
+  .container-archiveweek:nth-of-type(3n+1) {
     clear: none;
     padding: 0 5px;
   }
-  .container-archiveweek:nth-of-type(3n-3) {
+  .container-archiveweek:nth-of-type(3n-1) {
     clear: none;
     padding: 0 5px;
   }
