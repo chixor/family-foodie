@@ -233,6 +233,7 @@ def RecipeWeekDetail(request, year, week):
 
     if request.method=='DELETE':
         RecipeWeek.objects.filter(week=week,year=year).delete()
+        ShoppingList.objects.filter(week=week,year=year).delete()
 
     response = HttpResponse()
     response['allow'] = "get, post, put, delete, options"
