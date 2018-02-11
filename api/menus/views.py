@@ -162,8 +162,8 @@ def ShoppingLister(request, year, week):
                     ShoppingList.objects.filter(pk=ingredient['id']).update(fresh=ingredient['fresh'], sort=sort)
                 sort = sort + 1
         elif 'purchased' in body['data']:
-            if 'ingredientId' in body['data'] and body['data']['ingredientId'] is not None:
-                ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient_id=body['data']['ingredientId']).update(purchased=body['data']['purchased'])
+            if 'ingredient_id' in body['data'] and body['data']['ingredient_id'] is not None:
+                ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient_id=body['data']['ingredient_id']).update(purchased=body['data']['purchased'])
             else:
                 ShoppingList.objects.filter(pk=body['data']['id']).update(purchased=body['data']['purchased'])
 
