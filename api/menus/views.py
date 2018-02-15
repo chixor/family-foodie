@@ -201,7 +201,7 @@ def generateShoppingList(week, year):
 
     # reconcile with the existing list
     # Delete ingredients which aren't in the new list
-    ShoppingList.objects.filter(week=week, year=year, purchased=False).exclude(recipeIngredient__in=recipeIngIds).delete()
+    ShoppingList.objects.filter(week=week, year=year, purchased=False, name='').exclude(recipeIngredient__in=recipeIngIds).delete()
 
     # We don't want to update existing ingredients, so simply track its sort
     existingList = ShoppingList.objects.filter(week=week, year=year).values('id','recipeIngredient','sort')
@@ -245,7 +245,7 @@ def RecipeWeekDetail(request, year, week):
 
     if request.method=='DELETE':
         RecipeWeek.objects.filter(week=week,year=year).delete()
-        ShoppingList.objects.filter(week=week,year=year,purchased=False).delete()
+        ShoppingList.objects.filter(week=week,year=year,purchased=False,name='').delete()
 
     response = HttpResponse()
     response['allow'] = "get, post, put, delete, options"
