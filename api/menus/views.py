@@ -190,28 +190,40 @@ def countIngredientDuplicatesInShoppingList(ingredient_id,week,year):
 def generateShoppingList(week, year):
     recipes = RecipeWeek.objects.filter(week=week,year=year).values('recipe').order_by('id')
     allIngredients = list()
+    recipeIngIds = list()
     for recipe in recipes:
-        ingredients = RecipeIngredients.objects.filter(recipe=recipe['recipe']).values('id','recipe','ingredient','quantity','quantity4','quantityMeasure')
-        for ing in ingredients:
-            ingobj = Ingredients.objects.get(id=ing['ingredient'])
-            ing['name'] = ingobj.name
-            ing['fresh'] = ingobj.fresh
-            ing['cost'] = ingobj.cost
-            ing['category'] = ingobj.category.id
-
+        ingredients = RecipeIngredients.objects.filter(recipe=recipe['recipe']).values('id','recipe','ingredient','ingredient__name','ingredient__cost','ingredient__fresh','ingredient__category','quantity','quantity4','quantityMeasure')
         allIngredients = allIngredients + list(ingredients)
+        for ing in ingredients:
+            recipeIngIds.append(ing['id'])
 
-    allIngredients.sort(key=lambda x: (x['fresh'], x['category'], x['name']))
+    allIngredients.sort(key=lambda x: (x['ingredient__fresh'], x['ingredient__category'], x['ingredient__name']))
+
+    # reconcile with the existing list
+    # Delete ingredients which aren't in the new list
+    ShoppingList.objects.filter(week=week, year=year, purchased=False).exclude(recipeIngredient__in=recipeIngIds).delete()
+
+    # We don't want to update existing ingredients, so simply track its sort
+    existingList = ShoppingList.objects.filter(week=week, year=year).values('id','recipeIngredient','sort')
+    for existing in existingList:
+        for newIng in allIngredients:
+            if existing['recipeIngredient'] == newIng['id']:
+                newIng['sort'] = existing['sort']
+                break
+
     sort = 0
     for ingredient in allIngredients:
-        ing = ShoppingList.objects.create(week=week, year=year, fresh=ingredient['fresh'], recipeIngredient=RecipeIngredients.objects.get(id=ingredient['id']), cost=ingredient['cost'], sort=sort)
-        sort = sort + 1
+        if 'sort' in ingredient:
+            sort = ingredient['sort']
+        else:
+            ing = ShoppingList.objects.create(week=week, year=year, fresh=ingredient['ingredient__fresh'], recipeIngredient=RecipeIngredients.objects.get(id=ingredient['id']), cost=ingredient['ingredient__cost'], sort=sort)
+            sort = sort + 1
 
     # fix prices on duplicates
     for ingredient in allIngredients:
         duplicates = countIngredientDuplicatesInShoppingList(ingredient['ingredient'],week,year)
         if duplicates > 1:
-            cost = ingredient['cost']/duplicates
+            cost = ingredient['ingredient__cost']/duplicates
             ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient_id=ingredient['ingredient']).update(cost=cost)
 
 @return_403
@@ -228,12 +240,12 @@ def RecipeWeekDetail(request, year, week):
         for recipe in body['data']['recipes']:
             RecipeWeek.objects.create(week=week,year=year,recipe_id=recipe['id'])
 
-        ShoppingList.objects.filter(week=week,year=year).delete()
+        # reconcile the shopping list with these changes
         generateShoppingList(week,year)
 
     if request.method=='DELETE':
         RecipeWeek.objects.filter(week=week,year=year).delete()
-        ShoppingList.objects.filter(week=week,year=year).delete()
+        ShoppingList.objects.filter(week=week,year=year,purchased=False).delete()
 
     response = HttpResponse()
     response['allow'] = "get, post, put, delete, options"
