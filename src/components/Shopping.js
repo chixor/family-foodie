@@ -65,6 +65,10 @@ export default class Shopping extends Component {
         api.saveShoppingList(this.datestamp, this.state.ingredients.fresh.concat(this.state.ingredients.pantry))
     }
 
+    roundToTwo = num => {
+        return num ? +(Math.round(num + 'e+2') + 'e-2') : null
+    }
+
     dragStart = (ingredient, fromList, fromIndex) => {
         this.setState({ drag: { ingredient, fromList, fromIndex } })
     }
@@ -277,7 +281,7 @@ export default class Shopping extends Component {
                                                     </td>
                                                     <td>{r.name || r.ingredient}</td>
                                                     <td className="ingredient-quantity">
-                                                        {r.quantity} {r.quantityMeasure}
+                                                        {this.roundToTwo(r.quantity)} {r.quantityMeasure}
                                                         {parseFloat(r.quantity) > 1 ? 's' : null}
                                                     </td>
                                                     {r.ingredientId ? (
@@ -382,7 +386,7 @@ export default class Shopping extends Component {
                                                 >
                                                     <td>{r.ingredient}</td>
                                                     <td>
-                                                        {r.quantity} {r.quantityMeasure}
+                                                        {this.roundToTwo(r.quantity)} {r.quantityMeasure}
                                                         {parseFloat(r.quantity) > 1 ? 's' : null}
                                                     </td>
                                                 </tr>
