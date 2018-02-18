@@ -230,7 +230,7 @@ export default class Shopping extends Component {
                 </div>
                 <div className="row">
                     <div className="col-md-6 shopping-list">
-                        <div className="recipedetail">
+                        <div className="recipedetail shoppinglist">
                             <h3>
                                 Shopping List
                                 <span className="float-right">
@@ -366,7 +366,7 @@ export default class Shopping extends Component {
                     </div>
 
                     <div className="col-md-6 pantry">
-                        <div className="recipedetail">
+                        <div className="recipedetail shoppinglist">
                             <h3>Pantry</h3>
                             <table className="table" onDrop={this.drop} onDragOver={this.dragOverTable}>
                                 <tbody>

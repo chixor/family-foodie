@@ -145,10 +145,20 @@
   display: block; }
 
 .recipelist article, .recipedetail {
-  border-radius: 4pt;
   background: white;
   overflow: hidden;
   box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.2), 0 1px 10px 0 rgba(0, 0, 0, 0.1); }
+
+.recipedetail {
+  margin-left: -15px;
+  margin-right: -15px;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-bottom: 10pt;
+}
+.recipedetail.shoppinglist {
+  padding-bottom: 0;
+}
 
 .recipelist article {
   display: inline-block;
@@ -158,9 +168,6 @@
   box-sizing: border-box;
   height: 380px;
   text-align: left; }
-
-.recipedetail {
-  padding: 0 18px 10pt 14pt; }
 
 .recipelist article a {
   color: black;
@@ -331,3 +338,13 @@
 .icon-addon .form-control:focus + .fa,
 .icon-addon:hover .fa {
   color: #2580db; }
+
+@media only screen and (min-width: 800px) {
+  .recipelist article, .recipedetail {
+    border-radius: 4pt;
+  }
+
+  .recipedetail {
+    margin: 0;
+    padding: 0 18px 10pt 14pt; }
+}
