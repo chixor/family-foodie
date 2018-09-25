@@ -1,4 +1,4 @@
-## Menu Fresh: Installation Notes
+## Family Foodie: Installation Notes
 
 Notes to run this on a local dev environment (mac osx):
 
