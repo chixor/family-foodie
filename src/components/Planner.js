@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import api from '../utils/api'
 import MenuDate from '../utils/MenuDate'
-import search from '../utils/search'
 import Recipe from './Recipe'
 import debounce from 'lodash/debounce'
 import cloneDeep from 'lodash/cloneDeep'
@@ -35,11 +34,25 @@ export default class Planner extends Component {
         }
     }
 
+    newWeekObjectBlank = (week, year) => {
+        return {
+            week: week,
+            year: year,
+            recipes: [],
+            unsaved: true,
+            date: new MenuDate(year, week)
+        }
+    }
+
     getWeeks = () => {
         api.getWeeks().then(weeks => {
-            const mostRecentWeek = new MenuDate(weeks[0].year, weeks[0].week)
-            if (weeks.length === 0 || (weeks.length > 0 && mostRecentWeek.isBefore(this.state.thisWeek))) {
+            if (weeks.length === 0) {
                 weeks.unshift(this.newWeekObject(this.state.thisWeek.getWeek(), this.state.thisWeek.getYear()))
+            } else {
+                const mostRecentWeek = new MenuDate(weeks[0].year, weeks[0].week)
+                if (mostRecentWeek.isBefore(this.state.thisWeek)) {
+                    weeks.unshift(this.newWeekObject(this.state.thisWeek.getWeek(), this.state.thisWeek.getYear()))
+                }
             }
             const nextWeek = new MenuDate(weeks[0].year, weeks[0].week).nextWeek()
             weeks.forEach(w => {
@@ -50,7 +63,7 @@ export default class Planner extends Component {
     }
 
     getRecipes = () => {
-        api.getRecipes().then(recipes => {
+        api.getMyRecipes().then(recipes => {
             this.setState({ recipes })
         })
     }
@@ -108,6 +121,9 @@ export default class Planner extends Component {
     }
 
     chooseRecipe = () => {
+        // ran out start from scratch
+        if(this.limitedList.length == 0)
+            this.getRecipesForRandomisation()
         var index = this.limitedList[Math.floor(Math.random() * this.limitedList.length)]
 
         // remove all recipes with matching primary or secondary differential
@@ -119,7 +135,9 @@ export default class Planner extends Component {
     }
 
     chooseRecipes = howMany => {
-        return this.state.recipes.length > 0 ? Array.from({ length: howMany }, () => this.chooseRecipe()) : []
+        return this.state.recipes.length > 0 ?
+            Array.from({ length: howMany }, () => this.chooseRecipe()).filter(item => typeof item !== 'undefined') :
+            []
     }
 
     /**
@@ -160,9 +178,19 @@ export default class Planner extends Component {
 
     delete = index => {
         api.deleteWeek(this.state.weeks[index]).then(() => {
-            let weeks = this.state.weeks
+            let weeks, nextWeek;
+            weeks = this.state.weeks
             weeks.splice(index, 1)
-            const nextWeek = new MenuDate(weeks[0].year, weeks[0].week).nextWeek()
+            if (weeks == 0) {
+              weeks.unshift(this.newWeekObjectBlank(this.state.thisWeek.getWeek(), this.state.thisWeek.getYear()))
+              nextWeek = new MenuDate().nextWeek()
+            } else {
+              nextWeek = new MenuDate(weeks[0].year, weeks[0].week).nextWeek()
+            }
+            const mostRecentWeek = new MenuDate(weeks[0].year, weeks[0].week)
+            if (mostRecentWeek.isBefore(this.state.thisWeek)) {
+                weeks.unshift(this.newWeekObjectBlank(this.state.thisWeek.getWeek(), this.state.thisWeek.getYear()))
+            }
             this.setState({ weeks, nextWeek })
         })
     }
@@ -175,7 +203,16 @@ export default class Planner extends Component {
             weeks[index].unsaved = undefined
         } else {
             weeks.splice(index, 1)
-            nextWeek = new MenuDate(weeks[0].year, weeks[0].week).nextWeek()
+            if (weeks.length > 0) {
+              const mostRecentWeek = new MenuDate(weeks[0].year, weeks[0].week)
+              if (mostRecentWeek.isBefore(this.state.thisWeek)) {
+                  weeks.unshift(this.newWeekObjectBlank(this.state.thisWeek.getWeek(), this.state.thisWeek.getYear()))
+              }
+              nextWeek = new MenuDate(weeks[0].year, weeks[0].week).nextWeek()
+            } else {
+              weeks.unshift(this.newWeekObjectBlank(this.state.thisWeek.getWeek(), this.state.thisWeek.getYear()))
+              nextWeek = new MenuDate().nextWeek()
+            }
         }
         this.setState({ weeks, nextWeek })
     }
@@ -201,6 +238,7 @@ export default class Planner extends Component {
     }
 
     addOne = index => {
+        this.getRecipesForRandomisation()
         let weeks = this.state.weeks
         weeks[index].recipes.push(this.chooseRecipe())
         this.setState({ weeks })
@@ -245,7 +283,7 @@ export default class Planner extends Component {
             <div className="row">
                 <div className="col-md-12">
                     <button
-                        className="btn btn-default planner-addweek"
+                        className="btn btn-light planner-addweek"
                         onClick={() => this.addWeek(this.state.nextWeek.getWeek(), this.state.nextWeek.getYear())}
                     >
                         <span className="glyphicon glyphicon-plus" /> Week {this.state.nextWeek.getWeek()}
@@ -255,7 +293,7 @@ export default class Planner extends Component {
                             <section
                                 className={
                                     'planner-week ' +
-                                    (this.state.thisWeek.getWeek() == w.week && this.state.thisWeek.getYear() == w.year
+                                    (this.state.thisWeek.getWeek() === w.week && this.state.thisWeek.getYear() === w.year
                                         ? 'container-thisweek'
                                         : w.week < this.state.thisWeek.getWeek() ||
                                           w.year < this.state.thisWeek.getYear()
@@ -280,18 +318,18 @@ export default class Planner extends Component {
                                 {w.unsaved ? (
                                     <div className="planner-controls">
                                         &nbsp;<button
-                                            className="btn btn-xs btn-default"
+                                            className="btn btn-xs text-primary"
                                             onClick={() => this.randomizeAll(i)}
                                         >
-                                            <span className="glyphicon glyphicon-refresh" /> Randomize
+                                            <span className="glyphicon glyphicon-refresh" /> Automate
                                         </button>
-                                        &nbsp;<button className="btn btn-xs btn-success" onClick={() => this.save(i)}>
+                                        &nbsp;<button className="btn btn-xs text-success" onClick={() => this.save(i)}>
                                             <span className="glyphicon glyphicon-ok" /> Save
                                         </button>
-                                        &nbsp;<button className="btn btn-xs btn-danger" onClick={() => this.delete(i)}>
+                                        &nbsp;<button className="btn btn-xs text-danger" onClick={() => this.delete(i)}>
                                             <span className="glyphicon glyphicon-remove" /> Delete
                                         </button>
-                                        &nbsp;<button className="btn btn-xs btn-default" onClick={() => this.cancel(i)}>
+                                        &nbsp;<button className="btn btn-xs text-secondary" onClick={() => this.cancel(i)}>
                                             <span className="glyphicon glyphicon-remove" /> Cancel
                                         </button>
                                     </div>
@@ -300,17 +338,17 @@ export default class Planner extends Component {
                                     <div className="planner-controls">
                                         &nbsp;<button
                                             title="Edit"
-                                            className="btn btn-xs btn-default"
+                                            className="btn btn-xs text-primary"
                                             onClick={() => this.edit(i)}
                                         >
-                                            <span className="glyphicon glyphicon-pencil" />
+                                            <span className="glyphicon glyphicon-pencil" /> Edit
                                         </button>
                                         &nbsp;<a
                                             title="Shopping List"
                                             href={`/shopping/${w.year}/${w.week}`}
-                                            className="btn btn-xs btn-default"
+                                            className="btn btn-xs btn-link"
                                         >
-                                            <span className="glyphicon glyphicon-list" />
+                                            <span className="glyphicon glyphicon-list" /> Shopping List
                                         </a>
                                     </div>
                                 ) : null}
@@ -363,7 +401,7 @@ export default class Planner extends Component {
                                                                 >
                                                                     <img
                                                                         alt="thumbnail"
-                                                                        src={`/assets/resources/${r.front}.jpg`}
+                                                                        src={`/assets/resources/${r.filename}.jpg`}
                                                                     />{' '}
                                                                     <span>{r.name}</span>
                                                                 </li>

@@ -20,6 +20,7 @@ h4.shopping-week {
   margin: 5px 0 15px;
   font-family: Georgia, sans;
 }
+
 .supermarket-category {
   border-left: 5px solid white;
   padding-left: 7px !important;
@@ -38,6 +39,9 @@ h4.shopping-week {
   border-color: #f7989b;
 }
 .supermarket-category-deli {
+  border-color: #95cddb;
+}
+.supermarket-category-fridgefreezer {
   border-color: #95cddb;
 }
 .supermarket-category-bakery {
@@ -191,9 +195,12 @@ h4.shopping-week {
 }
 .planner-controls {
   position: absolute;
-  top: 11pt;
+  top: 40pt;
   right: 11pt;
   font-size: 170%;
+}
+.planner-controls .btn {
+  background-color:transparent;
 }
 .planner-addweek {
   position:absolute;

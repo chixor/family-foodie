@@ -1,15 +1,19 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
-from .models import Recipe, RecipeIngredients, Measure, Ingredients, RecipeWeek, ShoppingList
+from .models import Account, AccountUser, AccountRecipe, AccountIngredient, Recipe, RecipeIngredient, Measure, SupermarketCategory, Ingredient, RecipeWeek, ShoppingList, Season, PrimaryType, SecondaryType
+from .forms import SignUpForm
 from django.http import HttpResponse
 from django.template import loader
 from django.http import HttpResponseForbidden
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db.models import F, Sum, Count, Min, Max
+from django.db.models import Q, F, Sum, Count, Min, Max
+from datauri import DataURI
+import os
+import shutil
 import json
-
 
 def return_403(func):
     def _dec(*args, **kwargs):
@@ -19,105 +23,374 @@ def return_403(func):
             return func(*args, **kwargs)
     return _dec
 
-# Create your views here.
+# User authentication and signup
 
-@login_required
+def signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            # create user
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+
+            # create family foodie account and link user, recipes and ingredients
+            account_name = form.cleaned_data.get('last_name') + ' Family'
+            account = Account.objects.create(name=account_name)
+            accUser = AccountUser.objects.create(account=account,user=user)
+            publicRecipes = Recipe.objects.filter(public=True, duplicate=False)
+            for recipe in publicRecipes:
+                AccountRecipe.objects.create(account=account,recipe=recipe);
+            publicIngredients = Ingredient.objects.filter(public=True)
+            for ingredient in publicIngredients:
+                AccountIngredient.objects.create(account=account,ingredient=ingredient,category=ingredient.category,fresh=ingredient.fresh,stockcode=ingredient.stockcode,cost=ingredient.cost);
+
+            # authenticate and send to account page
+            login(request, user)
+            return redirect('/')
+    else:
+        form = SignUpForm()
+
+    return render(request, 'registration/signup.html', {'form': form})
+
+# Core feature set
+
+#@login_required
 def Index(request):
-    template = loader.get_template('index.html')
+    if request.user.is_authenticated:
+        template = loader.get_template('index.html')
+    else:
+        template = loader.get_template('home.html')
     return HttpResponse(template.render({}, request))
 
 @return_403
-def RecipeList(request):
-    recipes = Recipe.objects.filter(duplicate=False).values('id','name','front','description','season','primaryType','secondaryType','prepTime','cookTime').order_by('name')
+def User(request):
+    account = Account.objects.filter(accountuser__user=request.user).first()
+    return JsonResponse(dict(result={ 'account': account.name, 'username': request.user.username }))
+
+@return_403
+def MyRecipeList(request):
+    account = AccountUser.objects.get(user=request.user).account
+    recipes = Recipe.objects.filter(duplicate=False, accountrecipe__account=account, accountrecipe__archive=False).values('id','name','filename','description','season','primaryType','secondaryType','prepTime','cookTime').order_by('name')
     for recipe in recipes:
         recipe['ingredients'] = ''
-        ingredients = RecipeIngredients.objects.filter(recipe=recipe['id']).values('ingredient')
+        ingredients = RecipeIngredient.objects.filter(recipe=recipe['id']).values('ingredient')
         for ingredient in ingredients:
-            ingname = Ingredients.objects.get(id=ingredient['ingredient']).name
+            ingname = Ingredient.objects.get(id=ingredient['ingredient']).name
             recipe['ingredients'] = recipe['ingredients'] + ingname + ', '
 
     return JsonResponse(dict(result=list(recipes)))
 
 @return_403
+def RecipeList(request):
+    account = AccountUser.objects.get(user=request.user).account
+    myRecipes = Recipe.objects.filter(duplicate=False, accountrecipe__account=account, accountrecipe__archive=False).values('id','name','filename','description','season','primaryType','secondaryType','prepTime','cookTime').order_by('name')
+    for recipe in myRecipes:
+        weeks = RecipeWeek.objects.filter(account=account,recipe__id=recipe['id']).count()
+        recipe['canDelete'] = False
+        if weeks == 0:
+            recipe['canDelete'] = True
+
+        recipe['ingredients'] = ''
+        ingredients = RecipeIngredient.objects.filter(recipe=recipe['id']).values('ingredient')
+        for ingredient in ingredients:
+            ingname = Ingredient.objects.get(id=ingredient['ingredient']).name
+            recipe['ingredients'] = recipe['ingredients'] + ingname + ', '
+
+    archiveRecipes = Recipe.objects.filter(duplicate=False, accountrecipe__account=account, accountrecipe__archive=True).values('id','name','filename','description','season','primaryType','secondaryType','prepTime','cookTime').order_by('name')
+    publicRecipes = Recipe.objects.filter(duplicate=False, public=True).values('id','name','filename','description','season','primaryType','secondaryType','prepTime','cookTime').order_by('name')
+
+    return JsonResponse(dict(myRecipes=list(myRecipes), archiveRecipes=list(archiveRecipes), publicRecipes=list(publicRecipes)))
+
+@return_403
 def MeasureList(request):
-    return JsonResponse(dict(result=list(Measure.objects.values('name').order_by('name'))))
+    measureIngredients = list(Measure.objects.values('name').order_by('name'))
+    season = list(Season.objects.values('name'))
+    primaryType = list(PrimaryType.objects.values('name'))
+    secondaryType = list(SecondaryType.objects.values('name'))
+    return JsonResponse(dict(result={'measure': measureIngredients, 'season': season, 'primaryType': primaryType, 'secondaryType': secondaryType}))
+
+@return_403
+def CategoryList(request):
+    categories = SupermarketCategory.objects.values('id','name').order_by('id')
+    return JsonResponse(dict(result=list(categories)))
 
 @return_403
 def IngredientList(request):
-    return JsonResponse(dict(result=list(Ingredients.objects.values('id','name','category__id','category__name','cost','stockcode').order_by('category__id','name'))))
+    return JsonResponse(dict(result=list(AccountIngredient.objects.filter(account__accountuser__user=request.user).values('ingredient_id','ingredient__name','category__id','category__name','fresh','cost','stockcode').order_by('category__id','ingredient__name'))))
+
+@return_403
+def IngredientDetail(request,pk):
+    if request.method=='PUT':
+        body = json.loads(request.body)
+        details = body['data']['ingredient']
+        save = AccountIngredient.objects.filter(account__accountuser__user=request.user,ingredient_id=pk).update(category=details['category'],cost=details['cost'],fresh=details['fresh'],stockcode=details['stockcode'])
+
+    response = HttpResponse()
+    response['allow'] = "put, options"
+    return response
 
 @return_403
 def RecipeDetail(request,pk):
-    recipes = Recipe.objects.filter(duplicate=False).values('id','name','front','back','description','season','primaryType','secondaryType','prepTime','cookTime').filter(id=pk)
+    if request.method=='GET':
+        recipe = Recipe.objects.filter(id=pk,duplicate=False,accountrecipe__account__accountuser__user=request.user).values('id','name','filename','description','season__name','primaryType__name','secondaryType__name','prepTime','cookTime')
+        return JsonResponse(dict(result=list(recipe)))
 
-    return JsonResponse(dict(result=list(recipes)))
+    if request.method=='PUT':
+        body = json.loads(request.body)
+        details = body['data']['details']
+        primaryType = PrimaryType.objects.get(name=details['primaryType'])
+        secondaryType = SecondaryType.objects.get(name=details['secondaryType'])
+        season = None
+        deleteIngredients = body['data']['deleteIngredients']
+        if details['season'] :
+            season = Season.objects.get(name=season)
 
-@return_403
-def RecipeIngredient(request,pk,ingredient):
+        account = AccountUser.objects.get(user=request.user).account
+        recipe = Recipe.objects.get(accountrecipe__account=account,id=pk)
+
+        # are we editing a public recipe? If so, make a deep copy
+        if recipe.public:
+            old_recipe_filename = recipe.filename
+            recipe.pk = None
+            recipe.public = False
+            recipe.save()
+            recipe.filename = filename='{0:08d}'.format(recipe.id)
+            recipe.save()
+
+            # copy files
+            shutil.copy('../build/assets/resources/'+old_recipe_filename+'.jpg','../build/assets/resources/'+recipe.filename+'.jpg')
+            shutil.copy('../public/assets/resources/'+old_recipe_filename+'.jpg','../public/assets/resources/'+recipe.filename+'.jpg')
+            shutil.copy('../build/assets/resources/'+old_recipe_filename+'.pdf','../build/assets/resources/'+recipe.filename+'.pdf')
+            shutil.copy('../public/assets/resources/'+old_recipe_filename+'.pdf','../public/assets/resources/'+recipe.filename+'.pdf')
+
+            # copy ingredients and update shopping lists
+            ris = RecipeIngredient.objects.filter(recipe_id=pk)
+            deleteIngredients = []
+            for ri in ris:
+                old_ri = ri.id
+                ri.pk = None
+                ri.recipe = recipe
+                ri.save()
+                ShoppingList.objects.filter(account=account,recipeIngredient_id=old_ri).update(recipeIngredient=ri)
+                try:
+                    index = body['data']['deleteIngredients'].index(old_ri)
+                    deleteIngredients.append(ri.id)
+                except:
+                    pass
+
+            # update account reference and old plans
+            AccountRecipe.objects.filter(account=account,recipe_id=pk).update(recipe=recipe)
+            RecipeWeek.objects.filter(account=account,recipe_id=pk).update(recipe=recipe)
+
+        # now we can go ahead and perform the update
+        Recipe.objects.filter(id=recipe.id).update(name=details['name'],description=details['description'],prepTime=details['prepTime'],cookTime=details['cookTime'],primaryType=primaryType,secondaryType=secondaryType,season=season)
+
+        # replace the image
+        if 'image' in details:
+            image = DataURI(details['image'])
+            if(len(image.data) <= 1000000):
+                path = '/assets/resources/'+recipe.filename+'.jpg'
+                if os.path.exists('../build'+path):
+                    os.remove('../build'+path)
+                    os.remove('../public'+path)
+                with open('../build'+path, 'wb+') as file:
+                    file.write(image.data)
+                with open('../public'+path, 'wb+') as file:
+                    file.write(image.data)
+
+        # replace the pdf
+        if 'pdf' in details:
+            pdf = DataURI(details['pdf'])
+            if(len(pdf.data) <= 1000000):
+                path = '/assets/resources/'+recipe.filename+'.pdf'
+                if os.path.exists('../build'+path):
+                    os.remove('../build'+path)
+                    os.remove('../public'+path)
+                with open('../build/'+path, 'wb+') as file:
+                    file.write(pdf.data)
+                with open('../public/'+path, 'wb+') as file:
+                    file.write(pdf.data)
+
+        # update ingredients
+        for ingredient in deleteIngredients:
+            ing = Ingredient.objects.get(recipeingredient__id=ingredient)
+            ShoppingList.objects.filter(account=account,recipeIngredient_id=ingredient).update(name=ing.name,recipeIngredient=None)
+            RecipeIngredient.objects.filter(recipe=recipe,id=ingredient).delete()
+            # if its not a public ingredient, we haven't added cost or stockcode and it's not used anywhere else, delete it
+            otherRecipeIngredients = RecipeIngredient.objects.filter(ingredient=ing).count()
+            accountIngredient = AccountIngredient.objects.get(account=account,ingredient=ing)
+            if not ing.public and otherRecipeIngredients == 0 and accountIngredient.cost is None and accountIngredient.stockcode is None:
+                AccountIngredient.objects.filter(account=account,ingredient=ing).delete()
+                ing.delete()
+
+        for ingredient in body['data']['ingredients']:
+            try:
+                accing = AccountIngredient.objects.get(account=account,ingredient__name=ingredient['ingredient'])
+                accing.fresh = ingredient['fresh']
+                accing.save()
+                ing = Ingredient.objects.get(accountingredient__account=account,name=ingredient['ingredient'])
+            except ObjectDoesNotExist:
+                ing,created = Ingredient.objects.get_or_create(name=ingredient['ingredient'])
+                AccountIngredient.objects.create(account=account,ingredient=ing,fresh=ingredient['fresh'],category=ing.category,stockcode=ing.stockcode,cost=ing.cost)
+            mea = Measure.objects.get(name=ingredient['measurement'])
+            if 'recipeIngredientId' in ingredient and ingredient['recipeIngredientId']:
+                print(ing)
+                RecipeIngredient.objects.filter(recipe=recipe,id=ingredient['recipeIngredientId']).update(quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
+            else:
+                RecipeIngredient.objects.create(recipe=recipe,quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
+
+        return JsonResponse(dict(id=recipe.id))
+
     if request.method=='DELETE':
-        ing = RecipeIngredients.objects.get(recipe=pk,id=ingredient).ingredient_id
-        RecipeIngredients.objects.filter(recipe=pk,id=ingredient).delete()
-        Ingredients.objects.filter(id=ing).delete()
+        account = AccountUser.objects.get(user=request.user).account
+        body = json.loads(request.body)
+        action = body['action']
+
+        if action == 'archive':
+            AccountRecipe.objects.filter(recipe__id=pk,account=account).update(archive=True)
+        elif action == 'unarchive':
+            AccountRecipe.objects.filter(recipe__id=pk,account=account).update(archive=False)
+        elif action == 'delete':
+            # we can delete this if it's never been scheduled before
+            weeks = RecipeWeek.objects.filter(account=account,recipe__id=pk).count()
+            if weeks == 0:
+                # delete account reference to this recipe
+                AccountRecipe.objects.filter(account=account,recipe_id=pk).delete()
+                recipe = Recipe.objects.get(id=pk)
+
+                # if the recipe isn't public, delete it too
+                if recipe.public != True:
+                    # delete associated files
+                    path = '/assets/resources/'+recipe.filename+'.jpg'
+                    if os.path.exists('../build'+path):
+                        os.remove('../build'+path)
+                        os.remove('../public'+path)
+
+                    path = '/assets/resources/'+recipe.filename+'.pdf'
+                    if os.path.exists('../build'+path):
+                        os.remove('../build'+path)
+                        os.remove('../public'+path)
+
+                    ingredients = RecipeIngredient.objects.filter(recipe=recipe)
+                    RecipeIngredient.objects.filter(recipe=recipe).delete()
+                    Recipe.objects.get(id=pk).delete()
+
+                    # if no other recipe in this account uses these ingredients, delete ingredients too
+                    for ingredient in ingredients:
+                        ing = Ingredient.objects.get(id=ingredient.ingredient_id)
+                        otherRecipeIngredients = RecipeIngredient.objects.filter(recipe__accountrecipe__account=account,ingredient=ing).count()
+                        if otherRecipeIngredients == 0:
+                            AccountIngredient.objects.filter(account=account,ingredient=ing).delete()
+                            if not ing.public:
+                                ing.delete()
+
 
     response = HttpResponse()
-    response['allow'] = "delete, options"
+    response['allow'] = "get, put, delete, options"
+    return response
+
+@return_403
+def RecipeAdd(request):
+    if request.method=='POST':
+        body = json.loads(request.body)
+        details = body['data']['details']
+        primaryType = PrimaryType.objects.get(name=details['primaryType'])
+        secondaryType = SecondaryType.objects.get(name=details['secondaryType'])
+        season = None
+        if details['season'] :
+            season = Season.objects.get(name=season)
+
+        # create the recipe
+        recipe = Recipe.objects.create(name=details['name'],description=details['description'],prepTime=details['prepTime'],cookTime=details['cookTime'],primaryType=primaryType,secondaryType=secondaryType,season=season)
+        recipe.filename = '{0:08d}'.format(recipe.id)
+        recipe.save()
+
+        # save the image
+        if 'pdf' in details:
+            image = DataURI(details['image'])
+            if(len(image.data) <= 1000000):
+                with open('../build/assets/resources/'+recipe.filename+'.jpg', 'wb+') as file:
+                    file.write(image.data)
+                with open('../public/assets/resources/'+recipe.filename+'.jpg', 'wb+') as file:
+                    file.write(image.data)
+
+        # save the pdf
+        if 'pdf' in details:
+            pdf = DataURI(details['pdf'])
+            if(len(pdf.data) <= 1000000):
+                with open('../build/assets/resources/'+recipe.filename+'.pdf', 'wb+') as file:
+                    file.write(pdf.data)
+                with open('../public/assets/resources/'+recipe.filename+'.pdf', 'wb+') as file:
+                    file.write(pdf.data)
+
+        # grant access to this new recipe in this account only
+        account = AccountUser.objects.get(user=request.user).account
+        AccountRecipe.objects.create(account=account,recipe=recipe)
+
+        # create ingredients
+        for ingredient in body['data']['ingredients']:
+            try:
+                accing = AccountIngredient.objects.get(account=account,ingredient__name=ingredient['ingredient'])
+                accing.fresh = ingredient['fresh']
+                accing.save()
+                ing = Ingredient.objects.get(accountingredient__account=account,name=ingredient['ingredient'])
+            except ObjectDoesNotExist:
+                ing,created = Ingredient.objects.get_or_create(name=ingredient['ingredient'])
+                AccountIngredient.objects.create(account=account,ingredient=ing,fresh=ingredient['fresh'],category=ing.category,stockcode=ing.stockcode,cost=ing.cost)
+            mea = Measure.objects.get(name=ingredient['measurement'])
+            RecipeIngredient.objects.create(recipe=recipe,quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
+
+        return JsonResponse(dict(id=recipe.id))
+
+
+    response = HttpResponse()
+    response['allow'] = "post, options"
     return response
 
 @return_403
 def RecipeIngredientsList(request,pk):
     if request.method=='GET':
-        ingredients = RecipeIngredients.objects.filter(recipe=pk).values('recipe','ingredient','quantity','quantity4','quantityMeasure','id')
+        account = AccountUser.objects.get(user=request.user).account
+        ingredients = RecipeIngredient.objects.filter(recipe=pk,recipe__accountrecipe__account=account).values('recipe','ingredient','quantity','quantity4','quantityMeasure','id')
         for ing in ingredients:
             ing['quantityMeasure'] = Measure.objects.get(id=ing['quantityMeasure']).name
-            ingobj = Ingredients.objects.get(id=ing['ingredient'])
-            ing['ingredient'] = ingobj.name
-            ing['fresh'] = ingobj.fresh
+            ingobj = AccountIngredient.objects.filter(account=account,ingredient_id=ing['ingredient']).values('ingredient__name','fresh').first()
+            ing['ingredient'] = ingobj['ingredient__name']
+            ing['fresh'] = ingobj['fresh']
 
         return JsonResponse(dict(result=list(ingredients)))
 
-    if request.method=='PUT':
-        body = json.loads(request.body)
-        for ingredient in body['data']['ingredients']:
-            rea = Recipe.objects.get(id=pk)
-            try:
-                ing = Ingredients.objects.get(name=ingredient['ingredient'])
-                ing.fresh = ingredient['fresh']
-                ing.save()
-            except ObjectDoesNotExist:
-                ing = Ingredients.objects.create(name=ingredient['ingredient'],fresh=ingredient['fresh'])
-            mea = Measure.objects.get(name=ingredient['measurement'])
-            if 'recipeIngredientId' in ingredient and ingredient['recipeIngredientId']:
-                RecipeIngredients.objects.filter(id=ingredient['recipeIngredientId']).update(quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
-            else:
-                RecipeIngredients.objects.create(recipe=rea,quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
-
-    if request.method=='DELETE':
-        RecipeIngredients.objects.filter(recipe=pk).delete()
-
     response = HttpResponse()
-    response['allow'] = "get, post, put, delete, options"
+    response['allow'] = "get, options"
     return response
 
 @return_403
 def RecipeWeekList(request):
-    week_ids = RecipeWeek.objects.order_by('-year','-week').values('week','year').distinct()
+    account = AccountUser.objects.get(user=request.user).account
+    week_ids = RecipeWeek.objects.filter(account=account).order_by('-year','-week').values('week','year').distinct()
     for week in week_ids:
-        week['cost'] = ShoppingList.objects.filter(week=week['week'],year=week['year'],fresh=True).aggregate(Sum('cost'))['cost__sum']
-        recipes = RecipeWeek.objects.values('recipe').filter(week=week['week'],year=week['year'])
-        week['recipes'] = list(Recipe.objects.filter(duplicate=False).values('id','name','front','description','season','primaryType','secondaryType','prepTime','cookTime').filter(id__in=recipes))
+        week['cost'] = ShoppingList.objects.filter(account=account,week=week['week'],year=week['year'],fresh=True).aggregate(Sum('cost'))['cost__sum']
+        recipes = RecipeWeek.objects.values('recipe').filter(account=account,week=week['week'],year=week['year'])
+        week['recipes'] = list(Recipe.objects.filter(duplicate=False).values('id','name','filename','description','season','primaryType','secondaryType','prepTime','cookTime').filter(id__in=recipes))
 
         for recipe in week['recipes']:
-            recipe['cost'] = ShoppingList.objects.filter(week=week['week'],year=week['year'],fresh=True,recipeIngredient__recipe_id=recipe['id']).aggregate(Sum('cost'))['cost__sum']
+            recipe['cost'] = ShoppingList.objects.filter(account=account,week=week['week'],year=week['year'],fresh=True,recipeIngredient__recipe_id=recipe['id']).aggregate(Sum('cost'))['cost__sum']
 
     return JsonResponse(dict(result=list(week_ids)))
 
 @return_403
 def ShoppingLister(request, year, week):
+    account = AccountUser.objects.get(user=request.user).account
+
     def getList(fresh):
         shoppinglist = list(ShoppingList.objects.filter(
+            Q(recipeIngredient__ingredient__accountingredient__account=account) | Q(recipeIngredient__ingredient__accountingredient__account=None),
+            account=account,
             week=week,
             year=year,
-            fresh=fresh
+            fresh=fresh,
         ).values(
             'fresh',
             'name',
@@ -125,23 +398,23 @@ def ShoppingLister(request, year, week):
         ).annotate(
             id=Min('id'),
             cost=Sum('cost'),
-            defaultCost=F('recipeIngredient__ingredient__cost'),
             ingredientId=F('recipeIngredient__ingredient__id'),
-            category=F('recipeIngredient__ingredient__category__name'),
+            category=F('recipeIngredient__ingredient__accountingredient__category__name'),
             ingredient=F('recipeIngredient__ingredient__name'),
             quantityMeasure=F('recipeIngredient__quantityMeasure__name'),
             sort=Min('sort'),
             quantity=Sum('recipeIngredient__quantity'),
             quantity4=Sum('recipeIngredient__quantity4'),
-            stockcode=F('recipeIngredient__ingredient__stockcode')
+            defaultCost=F('recipeIngredient__ingredient__accountingredient__cost'),
+            stockcode=F('recipeIngredient__ingredient__accountingredient__stockcode')
         ).order_by('sort'))
 
         return shoppinglist
 
     if request.method=='GET':
         # load from ingredients and recipes tables
-        if ShoppingList.objects.filter(week=week,year=year).count() == 0:
-            generateShoppingList(week,year)
+        if ShoppingList.objects.filter(account=account,week=week,year=year).count() == 0:
+            generateShoppingList(account,week,year)
 
         return JsonResponse(dict(result={'fresh': getList(True), 'pantry': getList(False)}))
 
@@ -153,58 +426,58 @@ def ShoppingLister(request, year, week):
                 if 'ingredientId' in ingredient and ingredient['ingredientId'] is not None:
                     # check cost division for duplicates
                     if ingredient['cost'] is not None:
-                        ingredient['cost'] = ingredient['cost']/countIngredientDuplicatesInShoppingList(ingredient['ingredientId'],week,year)
-                    ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient_id=ingredient['ingredientId']).update(fresh=ingredient['fresh'], cost=ingredient['cost'], sort=sort)
+                        ingredient['cost'] = ingredient['cost']/countIngredientDuplicatesInShoppingList(account,ingredient['ingredientId'],week,year)
+                    ShoppingList.objects.filter(account=account,week=week,year=year,recipeIngredient__ingredient_id=ingredient['ingredientId']).update(fresh=ingredient['fresh'], cost=ingredient['cost'], sort=sort)
 
                     if 'replaceDefaultCost' in ingredient and ingredient['replaceDefaultCost']:
-                        Ingredients.objects.filter(id=ingredient['ingredientId']).update(cost=ingredient['cost']);
+                        AccountIngredient.objects.filter(account=account,ingredient_id=ingredient['ingredientId']).update(cost=ingredient['cost']);
                 else:
-                    ShoppingList.objects.filter(pk=ingredient['id']).update(fresh=ingredient['fresh'], sort=sort)
+                    ShoppingList.objects.filter(account=account,pk=ingredient['id']).update(fresh=ingredient['fresh'], sort=sort)
                 sort = sort + 1
         elif 'purchased' in body['data']:
             if 'ingredient_id' in body['data'] and body['data']['ingredient_id'] is not None:
-                ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient_id=body['data']['ingredient_id']).update(purchased=body['data']['purchased'])
+                ShoppingList.objects.filter(account=account,week=week,year=year,recipeIngredient__ingredient_id=body['data']['ingredient_id']).update(purchased=body['data']['purchased'])
             else:
-                ShoppingList.objects.filter(pk=body['data']['id']).update(purchased=body['data']['purchased'])
+                ShoppingList.objects.filter(account=account,pk=body['data']['id']).update(purchased=body['data']['purchased'])
 
     if request.method=='POST':
         body = json.loads(request.body)
         sort = ShoppingList.objects.filter(week=6,year=2018,fresh=True).aggregate(sort=Max('sort'))['sort']+1
-        result = ShoppingList.objects.create(week=week, year=year, fresh=True, name=body['data']['name'], sort=sort, purchased=False)
+        result = ShoppingList.objects.create(account=account, week=week, year=year, fresh=True, name=body['data']['name'], sort=sort, purchased=False)
         return JsonResponse(dict(id=result.id))
 
     if request.method=='DELETE':
         body = json.loads(request.body)
         if 'id' in body:
-            ShoppingList.objects.get(pk=body['id']).delete()
+            ShoppingList.objects.get(account=account,pk=body['id']).delete()
         elif 'reset' in body:
-            ShoppingList.objects.filter(week=week,year=year).delete()
+            ShoppingList.objects.filter(account=account,week=week,year=year).delete()
 
     response = HttpResponse()
     response['allow'] = "get, put, delete, post, options"
     return response
 
-def countIngredientDuplicatesInShoppingList(ingredient_id,week,year):
-    return ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient__id=ingredient_id).aggregate(ids=Count('recipeIngredient__ingredient__id'))['ids']
+def countIngredientDuplicatesInShoppingList(account,ingredient_id,week,year):
+    return ShoppingList.objects.filter(account=account,week=week,year=year,recipeIngredient__ingredient__id=ingredient_id).aggregate(ids=Count('recipeIngredient__ingredient__id'))['ids']
 
-def generateShoppingList(week, year):
-    recipes = RecipeWeek.objects.filter(week=week,year=year).values('recipe').order_by('id')
+def generateShoppingList(account, week, year):
+    recipes = RecipeWeek.objects.filter(account=account,week=week,year=year).values('recipe').order_by('id')
     allIngredients = list()
     recipeIngIds = list()
     for recipe in recipes:
-        ingredients = RecipeIngredients.objects.filter(recipe=recipe['recipe']).values('id','recipe','ingredient','ingredient__name','ingredient__cost','ingredient__fresh','ingredient__category','quantity','quantity4','quantityMeasure')
+        ingredients = RecipeIngredient.objects.filter(recipe__accountrecipe__account=account,ingredient__accountingredient__account=account,recipe=recipe['recipe']).values('id','recipe','ingredient','ingredient__name','ingredient__accountingredient__cost','ingredient__accountingredient__fresh','ingredient__accountingredient__category','quantity','quantity4','quantityMeasure')
         allIngredients = allIngredients + list(ingredients)
         for ing in ingredients:
             recipeIngIds.append(ing['id'])
 
-    allIngredients.sort(key=lambda x: (x['ingredient__fresh'], x['ingredient__category'], x['ingredient__name']))
+    allIngredients.sort(key=lambda x: (x['ingredient__accountingredient__fresh'], x['ingredient__accountingredient__category'], x['ingredient__name']))
 
     # reconcile with the existing list
     # Delete ingredients which aren't in the new list
-    ShoppingList.objects.filter(week=week, year=year, purchased=False, name='').exclude(recipeIngredient__in=recipeIngIds).delete()
+    ShoppingList.objects.filter(account=account,week=week,year=year,purchased=False,name='').exclude(recipeIngredient__in=recipeIngIds).delete()
 
     # We don't want to update existing ingredients, so simply track its sort
-    existingList = ShoppingList.objects.filter(week=week, year=year).values('id','recipeIngredient','sort')
+    existingList = ShoppingList.objects.filter(account=account,week=week,year=year).values('id','recipeIngredient','sort')
     for existing in existingList:
         for newIng in allIngredients:
             if existing['recipeIngredient'] == newIng['id']:
@@ -216,36 +489,38 @@ def generateShoppingList(week, year):
         if 'sort' in ingredient:
             sort = ingredient['sort']
         else:
-            ing = ShoppingList.objects.create(week=week, year=year, fresh=ingredient['ingredient__fresh'], recipeIngredient=RecipeIngredients.objects.get(id=ingredient['id']), cost=ingredient['ingredient__cost'], sort=sort)
+            ing = ShoppingList.objects.create(account=account,week=week,year=year,fresh=ingredient['ingredient__accountingredient__fresh'],recipeIngredient=RecipeIngredient.objects.filter(ingredient__accountingredient__account=account).get(id=ingredient['id']),cost=ingredient['ingredient__accountingredient__cost'],sort=sort)
             sort = sort + 1
 
     # fix prices on duplicates
     for ingredient in allIngredients:
-        duplicates = countIngredientDuplicatesInShoppingList(ingredient['ingredient'],week,year)
-        if duplicates > 1:
-            cost = ingredient['ingredient__cost']/duplicates
-            ShoppingList.objects.filter(week=week,year=year,recipeIngredient__ingredient_id=ingredient['ingredient']).update(cost=cost)
+        duplicates = countIngredientDuplicatesInShoppingList(account,ingredient['ingredient'],week,year)
+        if ingredient['ingredient__accountingredient__cost'] and duplicates and duplicates > 1:
+            cost = ingredient['ingredient__accountingredient__cost']/duplicates
+            ShoppingList.objects.filter(account=account,week=week,year=year,recipeIngredient__ingredient_id=ingredient['ingredient']).update(cost=cost)
 
 @return_403
 def RecipeWeekDetail(request, year, week):
+    account = AccountUser.objects.get(user=request.user).account
+
     if request.method=='GET':
-        weeks_list = RecipeWeek.objects.filter(week=week,year=year).values('recipe').order_by('id')
+        weeks_list = RecipeWeek.objects.filter(account=account,week=week,year=year).values('recipe').order_by('id')
         recipes = Recipe.objects.filter(duplicate=False,id__in=weeks_list)
 
-        return JsonResponse(dict(result=list(recipes.values('id','name','front','description','season','primaryType','secondaryType','prepTime','cookTime'))))
+        return JsonResponse(dict(result=list(recipes.values('id','name','filename','description','season','primaryType','secondaryType','prepTime','cookTime'))))
 
     if request.method=='PUT':
-        RecipeWeek.objects.filter(week=week,year=year).delete()
+        RecipeWeek.objects.filter(account=account,week=week,year=year).delete()
         body = json.loads(request.body)
         for recipe in body['data']['recipes']:
-            RecipeWeek.objects.create(week=week,year=year,recipe_id=recipe['id'])
+            RecipeWeek.objects.create(account=account,week=week,year=year,recipe_id=recipe['id'])
 
         # reconcile the shopping list with these changes
-        generateShoppingList(week,year)
+        generateShoppingList(account,week,year)
 
     if request.method=='DELETE':
-        RecipeWeek.objects.filter(week=week,year=year).delete()
-        ShoppingList.objects.filter(week=week,year=year,purchased=False,name='').delete()
+        RecipeWeek.objects.filter(account=account,week=week,year=year).delete()
+        ShoppingList.objects.filter(account=account,week=week,year=year,purchased=False,name='').delete()
 
     response = HttpResponse()
     response['allow'] = "get, post, put, delete, options"

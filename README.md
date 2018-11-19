@@ -3,8 +3,8 @@
 Notes to run this on a local dev environment (mac osx):
 
 ```
-git clone https://github.com/chixor/menu-fresh.git
-cd menu-fresh
+git clone https://github.com/chixor/family-foodie.git
+cd family-foodie
 npm install
 ```
 
@@ -28,6 +28,7 @@ virtualenv -p python3 env
 source env/bin/activate
 pip install mysqlclient
 pip install django
+pip install python-datauri
 # to get out of virtualenv just type: deactivate
 ```
 

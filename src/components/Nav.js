@@ -1,23 +1,27 @@
 import React, { Component } from 'react'
 import { NavLink } from 'react-router-dom'
+import api from '../utils/api'
 import { NotificationManager } from 'react-notifications'
-import Auth from '../utils/Auth'
 
 export default class Nav extends Component {
-    login(response) {
-        typeof response.error !== 'undefined'
-            ? NotificationManager.error(response.error)
-            : Auth.authenticateUser(response.tokenObj, response.profileObj)
 
-        this.setState({ isAuthenticated: true })
+    componentDidMount() {
+        this.getUser()
     }
 
-    logout() {
-        Auth.deauthenticateUser()
-        this.setState({ isAuthenticated: false })
+    getUser = () => {
+        api.getUser().then(account => {
+            this.setState({ account })
+        })
     }
 
     render() {
+        let account, username;
+        if(this.state && this.state.account) {
+          account = this.state.account.account
+          username = this.state.account.username
+        }
+
         return (
             <div>
                 <nav className="navbar navbar-inverse">
@@ -35,16 +39,16 @@ export default class Nav extends Component {
                                 <span className="icon-bar" />
                                 <span className="icon-bar" />
                             </button>
-                            <a className="navbar-brand" href="#">
+                            <a className="navbar-brand" href="/">
                                 <img alt="logo" src="/static/favicon.png" />
-                                Family Foodie
+                                {account}
                             </a>
                         </div>
 
                         <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul className="nav navbar-nav">
                                 <li>
-                                    <NavLink exact activeClassName="active" to="/">
+                                    <NavLink exact activeClassName="active" to="/planner">
                                         Planner
                                     </NavLink>
                                 </li>
@@ -58,22 +62,20 @@ export default class Nav extends Component {
                                         Recipes
                                     </NavLink>
                                 </li>
+                                <li>
+                                    <NavLink activeClassName="active" to="/ingredients">
+                                        Ingredients
+                                    </NavLink>
+                                </li>
                             </ul>
                             <div className="nav navbar-nav navbar-right">
                                 <a href="/accounts/logout" className="btn btn-success navbar-btn">
                                     Logout
                                 </a>
                             </div>
-                            <ul className="nav navbar-nav navbar-right">
-                                <li>
-                                    <a
-                                        target="_blank"
-                                        href="http://seasonalfoodguide.com/melbourne-victoria-seasonal-fresh-produce-guide-fruits-vegetables-in-season-availability-australia.html"
-                                    >
-                                        Melbourne Seasonal Food Guide
-                                    </a>
-                                </li>
-                            </ul>
+                            <div className="nav navbar-nav navbar-right">
+                                <span className="navbar-text">{username}</span>
+                            </div>
                         </div>
                     </div>
                 </nav>

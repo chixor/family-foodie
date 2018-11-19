@@ -4,14 +4,16 @@ from .models import *
 
 # Register your models here.
 
+admin.site.register(Account)
+admin.site.register(AccountUser)
+admin.site.register(AccountRecipe)
 admin.site.register(Recipe)
-admin.site.register(Ingredients)
+admin.site.register(Ingredient)
 admin.site.register(Preperation)
-admin.site.register(RecipeIngredients)
+admin.site.register(RecipeIngredient)
 admin.site.register(RecipeWeek)
-admin.site.register(Feature)
-admin.site.register(RecipeFeature)
 admin.site.register(Measure)
+admin.site.register(SupermarketCategory)
 admin.site.register(Season)
 admin.site.register(PrimaryType)
 admin.site.register(SecondaryType)

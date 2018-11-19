@@ -1,9 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import User
 import datetime
 from datetime import date
-
-# Create your models here.
-# These models are taken from our menus.
 
 class Season(models.Model):
 	name = models.CharField(max_length=20, unique=True)
@@ -12,45 +10,44 @@ class Season(models.Model):
 		return str(self.id) + "-" + self.name
 
 class PrimaryType(models.Model):
-	name = models.CharField(max_length=20, unique=True)
+	name = models.CharField(max_length=120, unique=True)
 
 	def __str__(self):
-                return str(self.id) + "-" + self.name
+		return str(self.id) + "-" + self.name
 
 class SecondaryType(models.Model):
-        name = models.CharField(max_length=20, unique=True)
+	name = models.CharField(max_length=120, unique=True)
 
-        def __str__(self):
-                return str(self.id) + "-" + self.name
+	def __str__(self):
+		return str(self.id) + "-" + self.name
 
+class Account(models.Model):
+	name = models.CharField(max_length=150,unique=False)
+
+	def __str__(self):
+		return str(self.id) + " - " + self.name
+
+class AccountUser(models.Model):
+	account = models.ForeignKey(Account, blank=False, null=False, on_delete=models.PROTECT)
+	user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+	def __str__(self):
+		return str(self.account.name) + " - " + self.user.username
 
 class Recipe(models.Model):
-	name = models.CharField(max_length=64,unique=True)
+	name = models.CharField(max_length=64,blank=False,null=False)
 	prepTime = models.SmallIntegerField(blank=True, null=True)
 	cookTime = models.SmallIntegerField()
-	front = models.CharField(max_length=64, blank=True, null=True)
-	back = models.CharField(max_length=64, blank=True, null=True)
+	filename = models.CharField(max_length=64, blank=False, null=True)
 	description = models.TextField(blank=True, null=True)
 	duplicate = models.BooleanField(default=False)
 	season = models.ForeignKey(Season, blank=True, null=True, on_delete=models.PROTECT)
 	primaryType = models.ForeignKey(PrimaryType, blank=True, null=True, on_delete=models.PROTECT)
 	secondaryType = models.ForeignKey(SecondaryType, blank=True, null=True, on_delete=models.PROTECT)
+	public = models.BooleanField(default=False, null=False)
 
 	def __str__(self):
 		return str(self.id) + " - " + self.name
-
-class Feature(models.Model):
-	name = models.CharField(max_length=20, unique=True)
-
-	def __str__(self):
-		return self.name
-
-class RecipeFeature(models.Model):
-	recipe = models.ForeignKey(Recipe, blank=False, on_delete=models.PROTECT)
-	feature = models.ForeignKey(Feature, blank=False, on_delete=models.PROTECT)
-
-	def __str__(self):
-		return self.recipe.name + " - " + self.feature.name
 
 class SupermarketCategory(models.Model):
 	name = models.CharField(max_length=20, unique=True)
@@ -58,15 +55,29 @@ class SupermarketCategory(models.Model):
 	def __str__(self):
 		return self.name
 
-class Ingredients(models.Model):
+class Ingredient(models.Model):
 	name = models.CharField(max_length=64,unique=True)
-	fresh = models.BooleanField(default=False)
 	category = models.ForeignKey(SupermarketCategory, blank=False, default=8, on_delete=models.PROTECT)
+	fresh = models.BooleanField(default=False)
 	stockcode = models.IntegerField(null=True)
 	cost = models.FloatField(null=True)
+	public = models.BooleanField(default=False, null=False)
 
 	def __str__(self):
 		return self.name
+
+class AccountRecipe(models.Model):
+	account = models.ForeignKey(Account, blank=False, null=False, on_delete=models.PROTECT)
+	recipe = models.ForeignKey(Recipe, blank=False, null=False, on_delete=models.PROTECT)
+	archive = models.BooleanField(default=False)
+
+class AccountIngredient(models.Model):
+	account = models.ForeignKey(Account, blank=False, null=False, on_delete=models.PROTECT)
+	ingredient = models.ForeignKey(Ingredient, blank=False, null=False, on_delete=models.PROTECT)
+	category = models.ForeignKey(SupermarketCategory, blank=False, default=8, on_delete=models.PROTECT)
+	fresh = models.BooleanField(default=False)
+	stockcode = models.IntegerField(null=True)
+	cost = models.FloatField(null=True)
 
 class Preperation(models.Model):
 	name = models.CharField(max_length=20,unique=True)
@@ -80,9 +91,9 @@ class Measure(models.Model):
 	def __str__(self):
 		return self.name
 
-class RecipeIngredients(models.Model):
+class RecipeIngredient(models.Model):
 	recipe = models.ForeignKey(Recipe, blank=False, on_delete=models.PROTECT)
-	ingredient = models.ForeignKey(Ingredients, blank=False, on_delete=models.PROTECT)
+	ingredient = models.ForeignKey(Ingredient, blank=False, on_delete=models.PROTECT)
 	preperation = models.ForeignKey(Preperation, blank=True, null=True, on_delete=models.PROTECT)
 
 	quantity = models.CharField(max_length=16, unique=False)
@@ -95,6 +106,7 @@ class RecipeIngredients(models.Model):
 		return self.recipe.name + " - " + self.ingredient.name
 
 class RecipeWeek(models.Model):
+	account = models.ForeignKey(Account, blank=False, null=False, on_delete=models.PROTECT)
 	recipe = models.ForeignKey(Recipe, blank=False, on_delete=models.PROTECT)
 	week = models.SmallIntegerField(blank=False, default=date.today().isocalendar()[1])
 	year = models.SmallIntegerField(blank=False, default=datetime.datetime.now().year)
@@ -103,10 +115,11 @@ class RecipeWeek(models.Model):
 		return str(self.year) + " - Week " + str(self.week) + " - " + self.recipe.name
 
 class ShoppingList(models.Model):
+	account = models.ForeignKey(Account, blank=False, null=False, on_delete=models.PROTECT)
 	week = models.SmallIntegerField(blank=False, default=date.today().isocalendar()[1])
 	year = models.SmallIntegerField(blank=False, default=datetime.datetime.now().year)
 	fresh = models.BooleanField(default=False)
-	recipeIngredient = models.ForeignKey(RecipeIngredients, blank=True, null=True, on_delete=models.PROTECT)
+	recipeIngredient = models.ForeignKey(RecipeIngredient, blank=True, null=True, on_delete=models.PROTECT)
 	name = models.CharField(max_length=40, blank=True)
 	sort = models.SmallIntegerField(blank=False, default=0)
 	cost = models.FloatField(blank=True, null=True)

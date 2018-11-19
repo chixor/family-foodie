@@ -253,6 +253,12 @@
   display: none;
 }
 
+article .actions {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
 .recipe-detail-card {
   width: 50%; }
 

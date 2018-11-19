@@ -16,11 +16,29 @@ function handleError(error) {
 }
 
 export default {
+    getUser: function() {
+      return axios
+          .get(`${BASEURL}/user/`)
+          .then(function(response) {
+              return response.data.result
+          })
+          .catch(handleError)
+    },
+
+    getMyRecipes: function() {
+        return axios
+            .get(`${BASEURL}/myrecipes/`)
+            .then(function(response) {
+                return response.data.result
+            })
+            .catch(handleError)
+    },
+
     getRecipes: function() {
         return axios
             .get(`${BASEURL}/recipes/`)
             .then(function(response) {
-                return response.data.result
+                return response.data
             })
             .catch(handleError)
     },
@@ -43,6 +61,26 @@ export default {
             .catch(handleError)
     },
 
+    saveRecipe: function(id, details, ingredients, deleteIngredients) {
+        if(id) {
+            return axios
+                .put(`${BASEURL}/recipe/${id}`, { data: { details, ingredients, deleteIngredients } })
+                .then(function(response) {
+                    NotificationManager.success('Recipe saved successfully')
+                    return response.data.id
+                })
+                .catch(handleError)
+        } else {
+            return axios
+                .post(`${BASEURL}/recipe/`, { data: { details, ingredients } })
+                .then(function(response) {
+                    NotificationManager.success('Recipe saved successfully')
+                    return response.data.id
+                })
+                .catch(handleError)
+        }
+    },
+
     saveRecipeIngredients: function(id, ingredients) {
         return axios
             .put(`${BASEURL}/recipe/${id}/ingredients/`, { data: { ingredients: ingredients } })
@@ -53,29 +91,58 @@ export default {
             .catch(handleError)
     },
 
-    deleteRecipeIngredients: function(id) {
+    saveIngredient: function(id, ingredient) {
         return axios
-            .delete(`${BASEURL}/recipe/${id}/ingredients/`)
+            .put(`${BASEURL}/ingredient/${id}`, { data: { ingredient } })
             .then(function(response) {
-                NotificationManager.success('Recipe ingredients deleted successfully')
+                NotificationManager.success('Ingredient saved successfully')
                 return response.data.result
             })
             .catch(handleError)
     },
 
-    deleteRecipeIngredient: function(recipe, ingredient) {
-        return axios
-            .delete(`${BASEURL}/recipe/${recipe}/ingredient/${ingredient}/`)
-            .then(function(response) {
-                NotificationManager.success('Recipe ingredient deleted successfully')
-                return response.data.result
-            })
-            .catch(handleError)
+    deleteRecipe: function(id) {
+      return axios
+          .delete(`${BASEURL}/recipe/${id}`, { data: { action: 'delete' } })
+          .then(function(response) {
+              NotificationManager.success('Recipe deleted successfully')
+              return response.data.result
+          })
+          .catch(handleError)
+    },
+
+    archiveRecipe: function(id) {
+      return axios
+          .delete(`${BASEURL}/recipe/${id}`, { data: { action: 'archive' } })
+          .then(function(response) {
+              NotificationManager.success('Recipe archived successfully')
+              return response.data.result
+          })
+          .catch(handleError)
+    },
+
+    unarchiveRecipe: function(id) {
+      return axios
+          .delete(`${BASEURL}/recipe/${id}`, { data: { action: 'unarchive' } })
+          .then(function(response) {
+              NotificationManager.success('Recipe unarchived successfully')
+              return response.data.result
+          })
+          .catch(handleError)
     },
 
     getMeasurements: function() {
         return axios
             .get(`${BASEURL}/measurements/`)
+            .then(function(response) {
+                return response.data.result
+            })
+            .catch(handleError)
+    },
+
+    getCategories: function() {
+        return axios
+            .get(`${BASEURL}/categories/`)
             .then(function(response) {
                 return response.data.result
             })

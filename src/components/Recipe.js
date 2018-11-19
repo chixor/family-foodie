@@ -5,6 +5,9 @@ export default class Recipe extends Component {
     render() {
         let randomBtn,
             deleteBtn,
+            deletePermBtn,
+            archivePermBtn,
+            unarchivePermBtn,
             cost = null
         if (typeof this.props.randomize !== 'undefined') {
             randomBtn = (
@@ -15,6 +18,36 @@ export default class Recipe extends Component {
                 >
                     <span className="glyphicon glyphicon-refresh" />
                 </div>
+            )
+        }
+        if (typeof this.props.deletePerm !== 'undefined' && this.props.canDelete) {
+            deletePermBtn = (
+                <button
+                    className="btn btn-xs text-danger"
+                    onClick={() => this.props.deletePerm(this.props.id)}
+                >
+                    <span className="glyphicon glyphicon-remove" /> Delete
+                </button>
+            )
+        }
+        if (typeof this.props.archivePerm !== 'undefined') {
+            archivePermBtn = (
+                <button
+                    className="btn btn-xs text-primary"
+                    onClick={() => this.props.archivePerm(this.props.id)}
+                >
+                    <span className="glyphicon glyphicon-remove" /> Archive
+                </button>
+            )
+        }
+        if (typeof this.props.unarchivePerm !== 'undefined') {
+            unarchivePermBtn = (
+                <button
+                    className="btn btn-xs text-primary"
+                    onClick={() => this.props.unarchivePerm(this.props.id)}
+                >
+                    <span className="glyphicon glyphicon-ok" /> Unarchive
+                </button>
             )
         }
         if (typeof this.props.delete !== 'undefined') {
@@ -42,13 +75,19 @@ export default class Recipe extends Component {
                 {deleteBtn}
                 {randomBtn}
                 <NavLink to={`/recipe/${this.props.id}`}>
-                    <img className="heroimage" alt="thumbnail" src={`/assets/resources/${this.props.front}.jpg`} />
+                    <img className="heroimage" alt="thumbnail" src={`/assets/resources/${this.props.filename}.jpg`} />
                 </NavLink>
                 <h3>{this.props.name}</h3>
                 <p className="preptime">
                     <span className="glyphicon glyphicon-time" /> {this.props.prepTime + this.props.cookTime}min
                 </p>
                 {cost}
+                {this.props.editable ?
+                <p className="actions">
+                    {unarchivePermBtn}
+                    {archivePermBtn}
+                    {deletePermBtn}
+                </p> : null}
             </article>
         )
     }

@@ -6,22 +6,31 @@
 <div class="col-md-6">
 
 <div class="recipedetail">
-<br/>
+<h2>Login</h2>
+<p>Don't have an account yet? <a href="/signup">Sign up!</a>
+
 {% if form.errors %}
-<div class="alert alert-success">
-<p>Your username and password didn't match. Please try again.</p>
+<div class="alert alert-danger">
+    {% for field in form %}
+        {% for error in field.errors %}
+            <p>{{ error|escape }}</p>
+        {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+        <p>{{ error|escape }}</p>
+    {% endfor %}
 </div>
 {% endif %}
 
 {% if next %}
-<div class="alert alert-success">
     {% if user.is_authenticated %}
-    <p>Your account doesn't have access to this page. To proceed,
-    please login with an account that has access.</p>
+    <div class="alert alert-success">
+      <p>Your account doesn't have access to this page. To proceed,
+        please login with an account that has access.</p>
+    </div>
     {% else %}
-    <p>Please login to see this page.</p>
+    <!--<p>Please login to see this page.</p>-->
     {% endif %}
-</div>
 {% endif %}
 
 
@@ -37,7 +46,7 @@
     <input class="form-control" id="id_password" name="password" type="password" required>
 </div>
 <div class="form-group">
-  <input class="btn btn-success" type="submit" value="login" />
+  <input class="btn btn-success" type="submit" value="Login" />
   <input type="hidden" name="next" value="{{ next }}" />
 </div>
 </form>
