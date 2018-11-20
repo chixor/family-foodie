@@ -327,7 +327,7 @@ export default class RecipeDetails extends Component {
                             <th>Delete</th>
                         </tr>
                         {this.state.recipeIngredients.map((r, i) => (
-                            <tr className="form-ingredient-group" key={`ingredients-${i}`}>
+                            <tr className="form-ingredient-group" key={`ingredients-${r.id}`}>
                                 <td className="form-group">
                                     <label className="sr-only" htmlFor="2p">
                                         2p
