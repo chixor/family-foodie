@@ -123,7 +123,7 @@ def IngredientList(request):
 @return_403
 def IngredientDetail(request,pk):
     if request.method=='PUT':
-        body = json.loads(request.body)
+        body = json.loads(request.body.decode('utf-8'))
         details = body['data']['ingredient']
         save = AccountIngredient.objects.filter(account__accountuser__user=request.user,ingredient_id=pk).update(category=details['category'],cost=details['cost'],fresh=details['fresh'],stockcode=details['stockcode'])
 
@@ -138,7 +138,7 @@ def RecipeDetail(request,pk):
         return JsonResponse(dict(result=list(recipe)))
 
     if request.method=='PUT':
-        body = json.loads(request.body)
+        body = json.loads(request.body.decode('utf-8'))
         details = body['data']['details']
         primaryType = PrimaryType.objects.get(name=details['primaryType'])
         secondaryType = SecondaryType.objects.get(name=details['secondaryType'])
@@ -245,7 +245,7 @@ def RecipeDetail(request,pk):
 
     if request.method=='DELETE':
         account = AccountUser.objects.get(user=request.user).account
-        body = json.loads(request.body)
+        body = json.loads(request.body.decode('utf-8'))
         action = body['action']
 
         if action == 'archive':
@@ -294,7 +294,7 @@ def RecipeDetail(request,pk):
 @return_403
 def RecipeAdd(request):
     if request.method=='POST':
-        body = json.loads(request.body)
+        body = json.loads(request.body.decode('utf-8'))
         details = body['data']['details']
         primaryType = PrimaryType.objects.get(name=details['primaryType'])
         secondaryType = SecondaryType.objects.get(name=details['secondaryType'])
@@ -419,7 +419,7 @@ def ShoppingLister(request, year, week):
         return JsonResponse(dict(result={'fresh': getList(True), 'pantry': getList(False)}))
 
     if request.method=='PUT':
-        body = json.loads(request.body)
+        body = json.loads(request.body.decode('utf-8'))
         if 'ingredients' in body['data']:
             sort = 0;
             for ingredient in body['data']['ingredients']:
@@ -441,13 +441,13 @@ def ShoppingLister(request, year, week):
                 ShoppingList.objects.filter(account=account,pk=body['data']['id']).update(purchased=body['data']['purchased'])
 
     if request.method=='POST':
-        body = json.loads(request.body)
+        body = json.loads(request.body.decode('utf-8'))
         sort = ShoppingList.objects.filter(week=6,year=2018,fresh=True).aggregate(sort=Max('sort'))['sort']+1
         result = ShoppingList.objects.create(account=account, week=week, year=year, fresh=True, name=body['data']['name'], sort=sort, purchased=False)
         return JsonResponse(dict(id=result.id))
 
     if request.method=='DELETE':
-        body = json.loads(request.body)
+        body = json.loads(request.body.decode('utf-8'))
         if 'id' in body:
             ShoppingList.objects.get(account=account,pk=body['id']).delete()
         elif 'reset' in body:
@@ -511,7 +511,7 @@ def RecipeWeekDetail(request, year, week):
 
     if request.method=='PUT':
         RecipeWeek.objects.filter(account=account,week=week,year=year).delete()
-        body = json.loads(request.body)
+        body = json.loads(request.body.decode('utf-8'))
         for recipe in body['data']['recipes']:
             RecipeWeek.objects.create(account=account,week=week,year=year,recipe_id=recipe['id'])
 
