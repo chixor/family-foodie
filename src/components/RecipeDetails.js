@@ -92,7 +92,7 @@ export default class RecipeDetails extends Component {
         editing = !this.state.editing
 
         if (editing && recipeIngredients.length === 0) {
-            recipeIngredients.push({}, {}, {}, {}, {})
+            recipeIngredients.push({id:this.randomId()}, {id:this.randomId()}, {id:this.randomId()}, {id:this.randomId()}, {id:this.randomId()})
         }
         this.setState({ editing, recipeIngredients })
     }
@@ -127,9 +127,13 @@ export default class RecipeDetails extends Component {
         })
     }
 
+    randomId() {
+      return Math.random().toString(36)
+    }
+
     addIngredient() {
         let recipeIngredients = this.state.recipeIngredients
-        recipeIngredients.push({})
+        recipeIngredients.push({id:this.randomId()})
         this.setState({ recipeIngredients })
     }
 
@@ -310,7 +314,6 @@ export default class RecipeDetails extends Component {
                     </div>
                 </div>
                 <div className="col-md-7">
-                    {this.state.ingredients.length}
                     <datalist id="all-ingredients">
                       {this.state.ingredients.map(ing =>
                         <option value={ing.ingredient__name}/>
