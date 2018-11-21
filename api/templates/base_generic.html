@@ -12,7 +12,9 @@
         background: #eee; }
 
       .navbar {
-        border-radius: 0px; }
+        border-radius: 0px;
+        margin: 0;
+      }
 
       .navbar-brand img {
         width: 20px;
@@ -43,33 +45,31 @@
           padding: 20px;
         }
 
-        .leader__heading {
-          position: absolute;
-          top: 50px;
-          background-color: #599722;
+        .jumbotron {
+          background: url('static/hero1.jpg') no-repeat center center;
+          background-size: cover;
+          margin:0;
           color: white;
-          left: 80px;
-          padding: 3px 7px;
-          text-transform: uppercase;
         }
 
-        .homepage .leader__copy {
-          position: absolute;
-          top: 109px;
-          background-color: rgba(0,0,0,0.75);
-          color: white;
-          left: 80px;
-          padding: 0 5px;
-          line-height: 1.5;
-          font-size: 21px;
-          font-weight: 500;
-          margin: 0;
-          text-transform: none;
+        .jumbotron h1 {
+          text-shadow: 0 0 150px black, 0 0 150px black, 0px 0px 1px black;
+        }
+        .jumbotron p.copy {
+          text-shadow: 0 0 150px black, 0 0 150px black, 0 0 150px black, 0 0 150px black, 0 0 150px black, 0 0 1px black;
+          font-weight: 400;
+        }
+
+        .jumbotron .btn {
+          box-shadow: 0 0 80px 0px rgba(0,0,0,0.9);
         }
 
         .homepage h3 {
-          text-transform: uppercase;
           margin: 2em 0 1em 0;
+        }
+
+        .homepage h3:first-child {
+          margin-top: 1em;
         }
     </style>
   </head>
@@ -85,9 +85,6 @@
                 <div class="nav navbar-nav navbar-right">
                     <a href="/accounts/login/?next=/" class="btn btn-success navbar-btn">
                         Login
-                    </a>
-                    <a href="/signup" class="btn btn-success navbar-btn">
-                        Signup
                     </a>
                 </div>
             </div>
