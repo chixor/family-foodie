@@ -240,13 +240,13 @@ def RecipeDetail(request,pk):
                     AccountIngredient.objects.create(account=account,ingredient=ing,fresh=ingredient['fresh'],category=ing.category,stockcode=ing.stockcode,cost=ing.cost)
                 mea = Measure.objects.get(name=ingredient['measurement'])
                 if 'recipeIngredientId' in ingredient and ingredient['recipeIngredientId']:
-                    print(ing)
                     RecipeIngredient.objects.filter(recipe=recipe,id=ingredient['recipeIngredientId']).update(quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
                 else:
                     RecipeIngredient.objects.create(recipe=recipe,quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
 
             return JsonResponse(dict(id=recipe.id))
         except Exception as e:
+            raise e
             return JsonResponse({'status':'false','message':str(e)}, status=500)
 
     if request.method=='DELETE':
@@ -351,6 +351,7 @@ def RecipeAdd(request):
 
             return JsonResponse(dict(id=recipe.id))
         except Exception as e:
+            raise e
             return JsonResponse({'status':'false','message':str(e)}, status=500)
 
     response = HttpResponse()

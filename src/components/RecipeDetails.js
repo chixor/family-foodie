@@ -77,13 +77,18 @@ export default class RecipeDetails extends Component {
                         ingredients[index] = {}
                     }
                     ingredients[index][key] = node.type === 'checkbox' ? node.checked : node.value
+                    if(node.type === 'hidden' && !parseInt(node.value)) {
+                        delete ingredients[index][key]
+                    }
                 })
             return true
         })
         ingredients = ingredients.filter(i => i.ingredient !== '')
 
         valid && api.saveRecipe(this.props.match.params.recipeId, details, ingredients, this.state.deleteIngredients).then((result) => {
-            window.location.href = `/recipe/${result}`
+            if(result !== null) {
+                window.location.href = `/recipe/${result}`
+            }
         })
     }
 
@@ -393,7 +398,7 @@ export default class RecipeDetails extends Component {
                                         defaultValue={r.id}
                                         ref={c => this.ingredientsForm.recipeIngredientId.set(i, c)}
                                         type="hidden"
-                                        id="recipeIngredientId"
+                                        id={`recipeIngredientId-${r.id}`}
                                     />
                                 </td>
                                 <td className="form-group">
