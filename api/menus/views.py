@@ -11,10 +11,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q, F, Sum, Count, Min, Max
 from datauri import DataURI
-from settings import BASE_DIR
+from django.conf import settings
 import os
 import shutil
 import json
+
+BASE_DIR = settings.BASE_DIR
 
 def return_403(func):
     def _dec(*args, **kwargs):
