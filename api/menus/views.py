@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q, F, Sum, Count, Min, Max
 from datauri import DataURI
+from settings import BASE_DIR
 import os
 import shutil
 import json
@@ -138,110 +139,113 @@ def RecipeDetail(request,pk):
         return JsonResponse(dict(result=list(recipe)))
 
     if request.method=='PUT':
-        body = json.loads(request.body.decode('utf-8'))
-        details = body['data']['details']
-        primaryType = PrimaryType.objects.get(name=details['primaryType'])
-        secondaryType = SecondaryType.objects.get(name=details['secondaryType'])
-        season = None
-        deleteIngredients = body['data']['deleteIngredients']
-        if details['season'] :
-            season = Season.objects.get(name=season)
+        try:
+            body = json.loads(request.body.decode('utf-8'))
+            details = body['data']['details']
+            primaryType = PrimaryType.objects.get(name=details['primaryType'])
+            secondaryType = SecondaryType.objects.get(name=details['secondaryType'])
+            season = None
+            deleteIngredients = body['data']['deleteIngredients']
+            if details['season'] :
+                season = Season.objects.get(name=season)
 
-        account = AccountUser.objects.get(user=request.user).account
-        recipe = Recipe.objects.get(accountrecipe__account=account,id=pk)
+            account = AccountUser.objects.get(user=request.user).account
+            recipe = Recipe.objects.get(accountrecipe__account=account,id=pk)
 
-        # are we editing a public recipe? If so, make a deep copy
-        if recipe.public:
-            old_recipe_filename = recipe.filename
-            recipe.pk = None
-            recipe.public = False
-            recipe.save()
-            recipe.filename = filename='{0:08d}'.format(recipe.id)
-            recipe.save()
+            # are we editing a public recipe? If so, make a deep copy
+            if recipe.public:
+                old_recipe_filename = recipe.filename
+                recipe.pk = None
+                recipe.public = False
+                recipe.save()
+                recipe.filename = filename='{0:08d}'.format(recipe.id)
+                recipe.save()
 
-            # copy files
-            shutil.copy('../build/assets/resources/'+old_recipe_filename+'.jpg','../build/assets/resources/'+recipe.filename+'.jpg')
-            shutil.copy('../public/assets/resources/'+old_recipe_filename+'.jpg','../public/assets/resources/'+recipe.filename+'.jpg')
-            shutil.copy('../build/assets/resources/'+old_recipe_filename+'.pdf','../build/assets/resources/'+recipe.filename+'.pdf')
-            shutil.copy('../public/assets/resources/'+old_recipe_filename+'.pdf','../public/assets/resources/'+recipe.filename+'.pdf')
+                # copy files
+                shutil.copy(BASE_DIR+'/build/assets/resources/'+old_recipe_filename+'.jpg',BASE_DIR+'/build/assets/resources/'+recipe.filename+'.jpg')
+                shutil.copy(BASE_DIR+'/public/assets/resources/'+old_recipe_filename+'.jpg',BASE_DIR+'/public/assets/resources/'+recipe.filename+'.jpg')
+                shutil.copy(BASE_DIR+'/build/assets/resources/'+old_recipe_filename+'.pdf',BASE_DIR+'/build/assets/resources/'+recipe.filename+'.pdf')
+                shutil.copy(BASE_DIR+'/public/assets/resources/'+old_recipe_filename+'.pdf',BASE_DIR+'/public/assets/resources/'+recipe.filename+'.pdf')
 
-            # copy ingredients and update shopping lists
-            ris = RecipeIngredient.objects.filter(recipe_id=pk)
-            deleteIngredients = []
-            for ri in ris:
-                old_ri = ri.id
-                ri.pk = None
-                ri.recipe = recipe
-                ri.save()
-                ShoppingList.objects.filter(account=account,recipeIngredient_id=old_ri).update(recipeIngredient=ri)
+                # copy ingredients and update shopping lists
+                ris = RecipeIngredient.objects.filter(recipe_id=pk)
+                deleteIngredients = []
+                for ri in ris:
+                    old_ri = ri.id
+                    ri.pk = None
+                    ri.recipe = recipe
+                    ri.save()
+                    ShoppingList.objects.filter(account=account,recipeIngredient_id=old_ri).update(recipeIngredient=ri)
+                    try:
+                        index = body['data']['deleteIngredients'].index(old_ri)
+                        deleteIngredients.append(ri.id)
+                    except:
+                        pass
+
+                # update account reference and old plans
+                AccountRecipe.objects.filter(account=account,recipe_id=pk).update(recipe=recipe)
+                RecipeWeek.objects.filter(account=account,recipe_id=pk).update(recipe=recipe)
+
+            # now we can go ahead and perform the update
+            Recipe.objects.filter(id=recipe.id).update(name=details['name'],description=details['description'],prepTime=details['prepTime'],cookTime=details['cookTime'],primaryType=primaryType,secondaryType=secondaryType,season=season)
+
+            # replace the image
+            if 'image' in details:
+                image = DataURI(details['image'])
+                if(len(image.data) <= 1000000):
+                    path = '/assets/resources/'+recipe.filename+'.jpg'
+                    if os.path.exists(BASE_DIR+'/build'+path):
+                        os.remove(BASE_DIR+'/build'+path)
+                        os.remove(BASE_DIR+'/public'+path)
+                    with open(BASE_DIR+'/build'+path, 'wb+') as file:
+                        file.write(image.data)
+                    with open(BASE_DIR+'/public'+path, 'wb+') as file:
+                        file.write(image.data)
+
+            # replace the pdf
+            if 'pdf' in details:
+                pdf = DataURI(details['pdf'])
+                if(len(pdf.data) <= 1000000):
+                    path = '/assets/resources/'+recipe.filename+'.pdf'
+                    if os.path.exists(BASE_DIR+'/build'+path):
+                        os.remove(BASE_DIR+'/build'+path)
+                        os.remove(BASE_DIR+'/public'+path)
+                    with open(BASE_DIR+'/build/'+path, 'wb+') as file:
+                        file.write(pdf.data)
+                    with open(BASE_DIR+'/public/'+path, 'wb+') as file:
+                        file.write(pdf.data)
+
+            # update ingredients
+            for ingredient in deleteIngredients:
+                ing = Ingredient.objects.get(recipeingredient__id=ingredient)
+                ShoppingList.objects.filter(account=account,recipeIngredient_id=ingredient).update(name=ing.name,recipeIngredient=None)
+                RecipeIngredient.objects.filter(recipe=recipe,id=ingredient).delete()
+                # if its not a public ingredient, we haven't added cost or stockcode and it's not used anywhere else, delete it
+                otherRecipeIngredients = RecipeIngredient.objects.filter(ingredient=ing).count()
+                accountIngredient = AccountIngredient.objects.get(account=account,ingredient=ing)
+                if not ing.public and otherRecipeIngredients == 0 and accountIngredient.cost is None and accountIngredient.stockcode is None:
+                    AccountIngredient.objects.filter(account=account,ingredient=ing).delete()
+                    ing.delete()
+
+            for ingredient in body['data']['ingredients']:
                 try:
-                    index = body['data']['deleteIngredients'].index(old_ri)
-                    deleteIngredients.append(ri.id)
-                except:
-                    pass
+                    accing = AccountIngredient.objects.get(account=account,ingredient__name=ingredient['ingredient'])
+                    accing.fresh = ingredient['fresh']
+                    accing.save()
+                    ing = Ingredient.objects.get(accountingredient__account=account,name=ingredient['ingredient'])
+                except ObjectDoesNotExist:
+                    ing,created = Ingredient.objects.get_or_create(name=ingredient['ingredient'])
+                    AccountIngredient.objects.create(account=account,ingredient=ing,fresh=ingredient['fresh'],category=ing.category,stockcode=ing.stockcode,cost=ing.cost)
+                mea = Measure.objects.get(name=ingredient['measurement'])
+                if 'recipeIngredientId' in ingredient and ingredient['recipeIngredientId']:
+                    print(ing)
+                    RecipeIngredient.objects.filter(recipe=recipe,id=ingredient['recipeIngredientId']).update(quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
+                else:
+                    RecipeIngredient.objects.create(recipe=recipe,quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
 
-            # update account reference and old plans
-            AccountRecipe.objects.filter(account=account,recipe_id=pk).update(recipe=recipe)
-            RecipeWeek.objects.filter(account=account,recipe_id=pk).update(recipe=recipe)
-
-        # now we can go ahead and perform the update
-        Recipe.objects.filter(id=recipe.id).update(name=details['name'],description=details['description'],prepTime=details['prepTime'],cookTime=details['cookTime'],primaryType=primaryType,secondaryType=secondaryType,season=season)
-
-        # replace the image
-        if 'image' in details:
-            image = DataURI(details['image'])
-            if(len(image.data) <= 1000000):
-                path = '/assets/resources/'+recipe.filename+'.jpg'
-                if os.path.exists('../build'+path):
-                    os.remove('../build'+path)
-                    os.remove('../public'+path)
-                with open('../build'+path, 'wb+') as file:
-                    file.write(image.data)
-                with open('../public'+path, 'wb+') as file:
-                    file.write(image.data)
-
-        # replace the pdf
-        if 'pdf' in details:
-            pdf = DataURI(details['pdf'])
-            if(len(pdf.data) <= 1000000):
-                path = '/assets/resources/'+recipe.filename+'.pdf'
-                if os.path.exists('../build'+path):
-                    os.remove('../build'+path)
-                    os.remove('../public'+path)
-                with open('../build/'+path, 'wb+') as file:
-                    file.write(pdf.data)
-                with open('../public/'+path, 'wb+') as file:
-                    file.write(pdf.data)
-
-        # update ingredients
-        for ingredient in deleteIngredients:
-            ing = Ingredient.objects.get(recipeingredient__id=ingredient)
-            ShoppingList.objects.filter(account=account,recipeIngredient_id=ingredient).update(name=ing.name,recipeIngredient=None)
-            RecipeIngredient.objects.filter(recipe=recipe,id=ingredient).delete()
-            # if its not a public ingredient, we haven't added cost or stockcode and it's not used anywhere else, delete it
-            otherRecipeIngredients = RecipeIngredient.objects.filter(ingredient=ing).count()
-            accountIngredient = AccountIngredient.objects.get(account=account,ingredient=ing)
-            if not ing.public and otherRecipeIngredients == 0 and accountIngredient.cost is None and accountIngredient.stockcode is None:
-                AccountIngredient.objects.filter(account=account,ingredient=ing).delete()
-                ing.delete()
-
-        for ingredient in body['data']['ingredients']:
-            try:
-                accing = AccountIngredient.objects.get(account=account,ingredient__name=ingredient['ingredient'])
-                accing.fresh = ingredient['fresh']
-                accing.save()
-                ing = Ingredient.objects.get(accountingredient__account=account,name=ingredient['ingredient'])
-            except ObjectDoesNotExist:
-                ing,created = Ingredient.objects.get_or_create(name=ingredient['ingredient'])
-                AccountIngredient.objects.create(account=account,ingredient=ing,fresh=ingredient['fresh'],category=ing.category,stockcode=ing.stockcode,cost=ing.cost)
-            mea = Measure.objects.get(name=ingredient['measurement'])
-            if 'recipeIngredientId' in ingredient and ingredient['recipeIngredientId']:
-                print(ing)
-                RecipeIngredient.objects.filter(recipe=recipe,id=ingredient['recipeIngredientId']).update(quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
-            else:
-                RecipeIngredient.objects.create(recipe=recipe,quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
-
-        return JsonResponse(dict(id=recipe.id))
+            return JsonResponse(dict(id=recipe.id))
+        except Exception as e:
+            return JsonResponse({'status':'false','message':str(e)}, status=500)
 
     if request.method=='DELETE':
         account = AccountUser.objects.get(user=request.user).account
@@ -264,14 +268,14 @@ def RecipeDetail(request,pk):
                 if recipe.public != True:
                     # delete associated files
                     path = '/assets/resources/'+recipe.filename+'.jpg'
-                    if os.path.exists('../build'+path):
-                        os.remove('../build'+path)
-                        os.remove('../public'+path)
+                    if os.path.exists(BASE_DIR+'/build'+path):
+                        os.remove(BASE_DIR+'/build'+path)
+                        os.remove(BASE_DIR+'/public'+path)
 
                     path = '/assets/resources/'+recipe.filename+'.pdf'
-                    if os.path.exists('../build'+path):
-                        os.remove('../build'+path)
-                        os.remove('../public'+path)
+                    if os.path.exists(BASE_DIR+'/build'+path):
+                        os.remove(BASE_DIR+'/build'+path)
+                        os.remove(BASE_DIR+'/public'+path)
 
                     ingredients = RecipeIngredient.objects.filter(recipe=recipe)
                     RecipeIngredient.objects.filter(recipe=recipe).delete()
@@ -294,56 +298,58 @@ def RecipeDetail(request,pk):
 @return_403
 def RecipeAdd(request):
     if request.method=='POST':
-        body = json.loads(request.body.decode('utf-8'))
-        details = body['data']['details']
-        primaryType = PrimaryType.objects.get(name=details['primaryType'])
-        secondaryType = SecondaryType.objects.get(name=details['secondaryType'])
-        season = None
-        if details['season'] :
-            season = Season.objects.get(name=season)
+        try:
+            body = json.loads(request.body.decode('utf-8'))
+            details = body['data']['details']
+            primaryType = PrimaryType.objects.get(name=details['primaryType'])
+            secondaryType = SecondaryType.objects.get(name=details['secondaryType'])
+            season = None
+            if details['season'] :
+                season = Season.objects.get(name=season)
 
-        # create the recipe
-        recipe = Recipe.objects.create(name=details['name'],description=details['description'],prepTime=details['prepTime'],cookTime=details['cookTime'],primaryType=primaryType,secondaryType=secondaryType,season=season)
-        recipe.filename = '{0:08d}'.format(recipe.id)
-        recipe.save()
+            # create the recipe
+            recipe = Recipe.objects.create(name=details['name'],description=details['description'],prepTime=details['prepTime'],cookTime=details['cookTime'],primaryType=primaryType,secondaryType=secondaryType,season=season)
+            recipe.filename = '{0:08d}'.format(recipe.id)
+            recipe.save()
 
-        # save the image
-        if 'pdf' in details:
-            image = DataURI(details['image'])
-            if(len(image.data) <= 1000000):
-                with open('../build/assets/resources/'+recipe.filename+'.jpg', 'wb+') as file:
-                    file.write(image.data)
-                with open('../public/assets/resources/'+recipe.filename+'.jpg', 'wb+') as file:
-                    file.write(image.data)
+            # save the image
+            if 'pdf' in details:
+                image = DataURI(details['image'])
+                if(len(image.data) <= 1000000):
+                    with open(BASE_DIR+'/build/assets/resources/'+recipe.filename+'.jpg', 'wb+') as file:
+                        file.write(image.data)
+                    with open(BASE_DIR+'/public/assets/resources/'+recipe.filename+'.jpg', 'wb+') as file:
+                        file.write(image.data)
 
-        # save the pdf
-        if 'pdf' in details:
-            pdf = DataURI(details['pdf'])
-            if(len(pdf.data) <= 1000000):
-                with open('../build/assets/resources/'+recipe.filename+'.pdf', 'wb+') as file:
-                    file.write(pdf.data)
-                with open('../public/assets/resources/'+recipe.filename+'.pdf', 'wb+') as file:
-                    file.write(pdf.data)
+            # save the pdf
+            if 'pdf' in details:
+                pdf = DataURI(details['pdf'])
+                if(len(pdf.data) <= 1000000):
+                    with open(BASE_DIR+'/build/assets/resources/'+recipe.filename+'.pdf', 'wb+') as file:
+                        file.write(pdf.data)
+                    with open(BASE_DIR+'/public/assets/resources/'+recipe.filename+'.pdf', 'wb+') as file:
+                        file.write(pdf.data)
 
-        # grant access to this new recipe in this account only
-        account = AccountUser.objects.get(user=request.user).account
-        AccountRecipe.objects.create(account=account,recipe=recipe)
+            # grant access to this new recipe in this account only
+            account = AccountUser.objects.get(user=request.user).account
+            AccountRecipe.objects.create(account=account,recipe=recipe)
 
-        # create ingredients
-        for ingredient in body['data']['ingredients']:
-            try:
-                accing = AccountIngredient.objects.get(account=account,ingredient__name=ingredient['ingredient'])
-                accing.fresh = ingredient['fresh']
-                accing.save()
-                ing = Ingredient.objects.get(accountingredient__account=account,name=ingredient['ingredient'])
-            except ObjectDoesNotExist:
-                ing,created = Ingredient.objects.get_or_create(name=ingredient['ingredient'])
-                AccountIngredient.objects.create(account=account,ingredient=ing,fresh=ingredient['fresh'],category=ing.category,stockcode=ing.stockcode,cost=ing.cost)
-            mea = Measure.objects.get(name=ingredient['measurement'])
-            RecipeIngredient.objects.create(recipe=recipe,quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
+            # create ingredients
+            for ingredient in body['data']['ingredients']:
+                try:
+                    accing = AccountIngredient.objects.get(account=account,ingredient__name=ingredient['ingredient'])
+                    accing.fresh = ingredient['fresh']
+                    accing.save()
+                    ing = Ingredient.objects.get(accountingredient__account=account,name=ingredient['ingredient'])
+                except ObjectDoesNotExist:
+                    ing,created = Ingredient.objects.get_or_create(name=ingredient['ingredient'])
+                    AccountIngredient.objects.create(account=account,ingredient=ing,fresh=ingredient['fresh'],category=ing.category,stockcode=ing.stockcode,cost=ing.cost)
+                mea = Measure.objects.get(name=ingredient['measurement'])
+                RecipeIngredient.objects.create(recipe=recipe,quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
 
-        return JsonResponse(dict(id=recipe.id))
-
+            return JsonResponse(dict(id=recipe.id))
+        except Exception as e:
+            return JsonResponse({'status':'false','message':str(e)}, status=500)
 
     response = HttpResponse()
     response['allow'] = "post, options"
