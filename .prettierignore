@@ -1,0 +1,12 @@
+.gitignore
+.eslintrc
+.npmrc
+.nvmrc
+.prettierignore
+.prettierrc
+**/.DS_Store
+**/dist/**
+**/bin/**
+**/*.md
+**/*.json
+**/*.css
