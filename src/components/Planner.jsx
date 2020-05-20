@@ -473,7 +473,7 @@ export default class Planner extends Component {
                             rel="tooltip"
                             title="email"
                           />
-                          {searchResults.length && (
+                          {searchResults.length > 0 && (
                             <ul className="search-results">
                               {searchResults.map((r) => (
                                 <li

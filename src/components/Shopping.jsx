@@ -8,6 +8,7 @@ export default class Shopping extends Component {
     super(props);
     this.state = {
       ingredients: [],
+      allIngredients: [],
       cost: 0,
       editPrices: false,
       offerDefaultPriceChange: [],
@@ -21,6 +22,7 @@ export default class Shopping extends Component {
   }
 
   componentDidMount() {
+    this.getIngredients();
     const { match } = this.props;
     const { week, year } = match.params;
     if (week && year) {
@@ -43,6 +45,12 @@ export default class Shopping extends Component {
       }
 
       this.setState({ ingredients, offerDefaultPriceChange, cost: cost.cost });
+    });
+  }
+
+  getIngredients() {
+    api.getIngredients().then((allIngredients) => {
+      this.setState({ allIngredients });
     });
   }
 
@@ -137,17 +145,25 @@ export default class Shopping extends Component {
 
     api
       .addShoppingListItem(this.datestamp, this.refs.newIngredient.value)
-      .then((id) => {
+      .then(({ id, cost, stockcode, supermarketCategory }) => {
         if (!id) return;
         ingredients.fresh.push({
           id,
-          cost: null,
+          cost,
+          stockcode,
+          supermarketCategory,
           fresh: true,
           ingredient: this.refs.newIngredient.value,
+          ingredientId: null,
           purchased: false,
         });
         this.refs.newIngredient.value = "";
-        this.setState({ ingredients });
+
+        const totalCost = ingredients.fresh.reduce((a, b) => ({
+          cost: a.cost + Number(b.cost),
+        }));
+
+        this.setState({ ingredients, cost: totalCost.cost });
       });
   };
 
@@ -157,7 +173,10 @@ export default class Shopping extends Component {
       .deleteShoppingListItem(this.datestamp, ingredients.fresh[index].id)
       .then(() => {
         ingredients.fresh.splice(index, 1);
-        this.setState({ ingredients });
+        const { cost } = ingredients.fresh.reduce((a, b) => ({
+          cost: a.cost + Number(b.cost),
+        }));
+        this.setState({ ingredients, cost });
       });
   };
 
@@ -192,7 +211,7 @@ export default class Shopping extends Component {
         return i;
       });
       api.saveShoppingList(this.datestamp, ingredients.fresh).then(() => {
-        const cost = ingredients.fresh.reduce((a, b) => ({
+        const { cost } = ingredients.fresh.reduce((a, b) => ({
           cost: a.cost + Number(b.cost),
         }));
         ingredients.fresh.forEach((i) => {
@@ -206,7 +225,7 @@ export default class Shopping extends Component {
           editPrices: !editPrices,
           ingredients,
           offerDefaultPriceChange,
-          cost: cost.cost,
+          cost,
         });
       });
     } else {
@@ -231,6 +250,7 @@ export default class Shopping extends Component {
       cost,
       editPrices,
       ingredients,
+      allIngredients,
       offerDefaultPriceChange,
     } = this.state;
     return (
@@ -253,6 +273,11 @@ export default class Shopping extends Component {
           </div>
         </div>
         <div className="row">
+          <datalist id="all-ingredients">
+            {allIngredients.map((ing) => (
+              <option value={ing.ingredient__name} />
+            ))}
+          </datalist>
           <div className="col-md-6 shopping-list">
             <div className="recipedetail shoppinglist">
               <h3>
@@ -274,7 +299,7 @@ export default class Shopping extends Component {
                   <tr>
                     <th colSpan="2">Ingredients</th>
                     <th className="ingredient-quantity">2p</th>
-                    <th colSpan="2" className="ingredient-price">
+                    <th colSpan="3" className="ingredient-price">
                       Price&nbsp;
                       <button
                         type="button"
@@ -319,7 +344,7 @@ export default class Shopping extends Component {
                             {this.roundToTwo(r.quantity)} {r.quantityMeasure}
                             {parseFloat(r.quantity) > 1 ? "s" : null}
                           </td>
-                          {r.ingredientId ? (
+                          {r.cost ? (
                             <td className="align-right">
                               {editPrices ? (
                                 <div className="popside-container">
@@ -361,7 +386,7 @@ export default class Shopping extends Component {
                             <td />
                           )}
                           <td className="table-column-tiny align-center pad-left">
-                            {r.stockcode ? (
+                            {r.stockcode !== null && (
                               <a
                                 title="Woolworths details"
                                 target="_blank"
@@ -370,12 +395,15 @@ export default class Shopping extends Component {
                               >
                                 <span className="glyphicon glyphicon-new-window" />
                               </a>
-                            ) : (
+                            )}
+                          </td>
+                          <td className="table-column-tiny align-center pad-left">
+                            {r.ingredientId === null ? (
                               <span
                                 onClick={() => this.delete(i)}
                                 className="glyphicon glyphicon-remove"
                               />
-                            )}
+                            ) : null}
                           </td>
                         </tr>
                       );
@@ -389,6 +417,7 @@ export default class Shopping extends Component {
                           placeholder="add item..."
                           ref="newIngredient"
                           name="newIngredient"
+                          list="all-ingredients"
                         />
                       </form>
                     </td>

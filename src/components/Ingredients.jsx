@@ -22,6 +22,7 @@ export default class Ingredients extends Component {
     api.getIngredients().then((ingredients) => {
       api.getPantryCategories().then((pantryCategories) => {
         api.getSupermarketCategories().then((supermarketCategories) => {
+          ingredients.push({});
           this.setState({
             ingredients,
             pantryCategories,
@@ -39,16 +40,8 @@ export default class Ingredients extends Component {
     this.setState({ editing });
   };
 
-  add = () => {
-    const { ingredients, editing } = this.state;
-    const id = ingredients.push({});
-    editing.push(id);
-    this.forms[id] = {};
-    this.setState({ ingredients, editing });
-  };
-
   save = (id) => {
-    const { editing } = this.state;
+    const { editing, ingredients } = this.state;
     const details = {};
     let valid = true;
     Object.keys(this.forms[id]).map((key) => {
@@ -68,10 +61,16 @@ export default class Ingredients extends Component {
       }
     });
 
-    if (valid)
+    if (valid && typeof id !== "undefined")
       api.saveIngredient(id, details).then(() => {
         editing.splice(editing.indexOf(id), 1);
         this.setState({ editing }, () => this.load());
+      });
+    else if (valid)
+      api.addIngredient(details).then(() => {
+        editing.splice(editing.indexOf(id), 1);
+        ingredients.pop();
+        this.setState({ ingredients, editing }, () => this.load());
       });
   };
 
@@ -102,6 +101,7 @@ export default class Ingredients extends Component {
                 editing.indexOf(i.ingredient_id) > -1 ? (
                   <tr>
                     <td
+                      colspan="2"
                       className={`table-column-tiny supermarket-category supermarket-category-${
                         i.supermarketCategory__name
                           ? i.supermarketCategory__name
@@ -118,7 +118,7 @@ export default class Ingredients extends Component {
                           (this.forms[i.ingredient_id].supermarketCategory = c)
                         }
                         className="form-control"
-                        style={{ width: "100px" }}
+                        style={{ width: "100px", float: "left" }}
                         id={`${i.ingredient_id}-category`}
                       >
                         {supermarketCategories.map((cat) => (
@@ -137,7 +137,7 @@ export default class Ingredients extends Component {
                           (this.forms[i.ingredient_id].pantryCategory = c)
                         }
                         className="form-control"
-                        style={{ width: "100px" }}
+                        style={{ width: "100px", float: "left" }}
                         id={`${i.ingredient_id}-category`}
                       >
                         {pantryCategories.map((cat) => (
@@ -149,8 +149,22 @@ export default class Ingredients extends Component {
                           </option>
                         ))}
                       </select>
+                      <input
+                        style={{ width: "250px", float: "left" }}
+                        defaultValue={i.ingredient__name}
+                        type="text"
+                        ref={(c) => (this.forms[i.ingredient_id].name = c)}
+                        className="form-control"
+                        id={`${i.ingredient_id}-name`}
+                        required="required"
+                        placeholder="ingredient name"
+                        disabled={
+                          typeof i.ingredient__name === "undefined"
+                            ? ""
+                            : "disabled"
+                        }
+                      />
                     </td>
-                    <td>{i.ingredient__name}</td>
                     <td className="form-group align-center">
                       <label>
                         <input
@@ -231,26 +245,29 @@ export default class Ingredients extends Component {
                       ) : null}
                     </td>
                     <td>
-                      <button
-                        type="button"
-                        className="btn btn-xs btn-default float-right"
-                        onClick={() => this.edit(i.ingredient_id)}
-                      >
-                        <span className="glyphicon glyphicon-pencil" /> edit
-                      </button>
+                      {typeof i.ingredient_id === "undefined" ? (
+                        <button
+                          type="button"
+                          className="btn btn-xs btn-default float-right"
+                          onClick={() => this.edit(i.ingredient_id)}
+                        >
+                          <span className="glyphicon glyphicon-plus" /> add
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn btn-xs btn-default float-right"
+                          onClick={() => this.edit(i.ingredient_id)}
+                        >
+                          <span className="glyphicon glyphicon-pencil" /> edit
+                        </button>
+                      )}
                     </td>
                   </tr>
                 )
               )}
             </tbody>
           </table>
-          <button
-            type="button"
-            className="btn btn-xs btn-success float-left"
-            onClick={() => this.add()}
-          >
-            <span className="glyphicon glyphicon-plus" /> add ingredient
-          </button>
         </div>
       </section>
     );

@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^api/supermarketcategories/$', views.SupermarketCategoryList),
     url(r'^api/pantrycategories/$', views.PantryCategoryList),
     url(r'^api/ingredients/$', views.IngredientList),
+    url(r'^api/ingredient/$', views.IngredientList),
     url(r'^api/ingredient/(?P<pk>[0-9]+)$', views.IngredientDetail),
     url(r'^api/recipe/$', views.RecipeAdd),
     url(r'^api/recipe/(?P<pk>[0-9]+)$', views.RecipeDetail),

@@ -94,6 +94,16 @@ export default {
       .catch(handleError);
   },
 
+  addIngredient(ingredient) {
+    return axios
+      .post(`${BASEURL}/ingredient/`, { data: { ingredient } })
+      .then((response) => {
+        NotificationManager.success("Ingredient added successfully");
+        return response.data.result;
+      })
+      .catch(handleError);
+  },
+
   deleteRecipe(id) {
     return axios
       .delete(`${BASEURL}/recipe/${id}`, { data: { action: "delete" } })
@@ -210,7 +220,7 @@ export default {
       })
       .then((response) => {
         NotificationManager.success("Item added successfully");
-        return response.data.id;
+        return response.data;
       })
       .catch(handleError);
   },
