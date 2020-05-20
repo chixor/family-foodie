@@ -5,6 +5,12 @@ import api from "../utils/api";
 import MenuDate from "../utils/MenuDate";
 import Recipe from "./Recipe";
 
+const WeekKeyword = (itemWeek, itemYear, calendarWeek, calendarYear) => {
+  if (itemWeek === calendarWeek && itemYear === calendarYear) return "this";
+  if (itemWeek < calendarWeek || itemYear < calendarYear) return "archive";
+  return "future";
+};
+
 export default class Planner extends Component {
   constructor(props) {
     super(props);
@@ -331,13 +337,12 @@ export default class Planner extends Component {
           {weeks.length > 0 &&
             weeks.map((w, i) => (
               <section
-                className={`planner-week ${
-                  thisWeek.getWeek() === w.week && thisWeek.getYear() === w.year
-                    ? "container-thisweek"
-                    : w.week < thisWeek.getWeek() || w.year < thisWeek.getYear()
-                    ? "container-archiveweek"
-                    : "container-futureweek"
-                }`}
+                className={`planner-week container-${WeekKeyword(
+                  w.week,
+                  w.year,
+                  thisWeek.getWeek(),
+                  thisWeek.getYear()
+                )}week`}
                 key={`week-${w.week}-${w.year}`}
               >
                 <h2 className="shopping-week">
