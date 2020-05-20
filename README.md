@@ -43,6 +43,7 @@ vim settings.py
 Run Django:
 
 ```
+source env/bin/activate
 cd api/
 python3 manage.py runserver
 ```

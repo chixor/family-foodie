@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
-from .models import Account, AccountUser, AccountRecipe, AccountIngredient, Recipe, RecipeIngredient, Measure, SupermarketCategory, Ingredient, RecipeWeek, ShoppingList, Season, PrimaryType, SecondaryType
+from .models import Account, AccountUser, AccountRecipe, AccountIngredient, Recipe, RecipeIngredient, Measure, SupermarketCategory, PantryCategory, Ingredient, RecipeWeek, ShoppingList, Season, PrimaryType, SecondaryType
 from .forms import SignUpForm
 from django.http import HttpResponse
 from django.template import loader
@@ -47,7 +47,7 @@ def signup(request):
                 AccountRecipe.objects.create(account=account,recipe=recipe);
             publicIngredients = Ingredient.objects.filter(public=True)
             for ingredient in publicIngredients:
-                AccountIngredient.objects.create(account=account,ingredient=ingredient,category=ingredient.category,fresh=ingredient.fresh,stockcode=ingredient.stockcode,cost=ingredient.cost);
+                AccountIngredient.objects.create(account=account,ingredient=ingredient,supermarketCategory=ingredient.supermarketCategory,pantryCategory=ingredient.pantryCategory,fresh=ingredient.fresh,stockcode=ingredient.stockcode,cost=ingredient.cost);
 
             # authenticate and send to account page
             login(request, user)
@@ -115,20 +115,25 @@ def MeasureList(request):
     return JsonResponse(dict(result={'measure': measureIngredients, 'season': season, 'primaryType': primaryType, 'secondaryType': secondaryType}))
 
 @return_403
-def CategoryList(request):
+def SupermarketCategoryList(request):
     categories = SupermarketCategory.objects.values('id','name').order_by('id')
     return JsonResponse(dict(result=list(categories)))
 
 @return_403
+def PantryCategoryList(request):
+    categories = PantryCategory.objects.values('id','name').order_by('id')
+    return JsonResponse(dict(result=list(categories)))
+
+@return_403
 def IngredientList(request):
-    return JsonResponse(dict(result=list(AccountIngredient.objects.filter(account__accountuser__user=request.user).values('ingredient_id','ingredient__name','category__id','category__name','fresh','cost','stockcode').order_by('category__id','ingredient__name'))))
+    return JsonResponse(dict(result=list(AccountIngredient.objects.filter(account__accountuser__user=request.user).values('ingredient_id','ingredient__name','supermarketCategory__id','supermarketCategory__name','pantryCategory__id','pantryCategory__name','pantryCategory__id','pantryCategory__name','fresh','cost','stockcode').order_by('supermarketCategory__id','ingredient__name'))))
 
 @return_403
 def IngredientDetail(request,pk):
     if request.method=='PUT':
         body = json.loads(request.body.decode('utf-8'))
         details = body['data']['ingredient']
-        save = AccountIngredient.objects.filter(account__accountuser__user=request.user,ingredient_id=pk).update(category=details['category'],cost=details['cost'],fresh=details['fresh'],stockcode=details['stockcode'])
+        save = AccountIngredient.objects.filter(account__accountuser__user=request.user,ingredient_id=pk).update(supermarketCategory=details['supermarketCategory'],pantryCategory=details['pantryCategory'],cost=details['cost'],fresh=details['fresh'],stockcode=details['stockcode'])
 
     response = HttpResponse()
     response['allow'] = "put, options"
@@ -237,7 +242,7 @@ def RecipeDetail(request,pk):
                     ing = Ingredient.objects.get(accountingredient__account=account,name=ingredient['ingredient'])
                 except ObjectDoesNotExist:
                     ing,created = Ingredient.objects.get_or_create(name=ingredient['ingredient'])
-                    AccountIngredient.objects.create(account=account,ingredient=ing,fresh=ingredient['fresh'],category=ing.category,stockcode=ing.stockcode,cost=ing.cost)
+                    AccountIngredient.objects.create(account=account,ingredient=ing,fresh=ingredient['fresh'],supermarketCategory=ing.supermarketCategory,pantryCategory=ing.pantryCategory,stockcode=ing.stockcode,cost=ing.cost)
                 mea = Measure.objects.get(name=ingredient['measurement'])
                 if 'recipeIngredientId' in ingredient and ingredient['recipeIngredientId']:
                     RecipeIngredient.objects.filter(recipe=recipe,id=ingredient['recipeIngredientId']).update(quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
@@ -345,7 +350,7 @@ def RecipeAdd(request):
                     ing = Ingredient.objects.get(accountingredient__account=account,name=ingredient['ingredient'])
                 except ObjectDoesNotExist:
                     ing,created = Ingredient.objects.get_or_create(name=ingredient['ingredient'])
-                    AccountIngredient.objects.create(account=account,ingredient=ing,fresh=ingredient['fresh'],category=ing.category,stockcode=ing.stockcode,cost=ing.cost)
+                    AccountIngredient.objects.create(account=account,ingredient=ing,fresh=ingredient['fresh'],supermarketCategory=ing.supermarketCategory,pantryCategory=ing.pantryCategory,stockcode=ing.stockcode,cost=ing.cost)
                 mea = Measure.objects.get(name=ingredient['measurement'])
                 RecipeIngredient.objects.create(recipe=recipe,quantity=ingredient['two'],quantity4=ingredient['four'],quantityMeasure=mea,ingredient=ing)
 
@@ -408,7 +413,8 @@ def ShoppingLister(request, year, week):
             id=Min('id'),
             cost=Sum('cost'),
             ingredientId=F('recipeIngredient__ingredient__id'),
-            category=F('recipeIngredient__ingredient__accountingredient__category__name'),
+            supermarketCategory=F('recipeIngredient__ingredient__accountingredient__supermarketCategory__name'),
+            pantryCategory=F('recipeIngredient__ingredient__accountingredient__pantryCategory__name'),
             ingredient=F('recipeIngredient__ingredient__name'),
             quantityMeasure=F('recipeIngredient__quantityMeasure__name'),
             sort=Min('sort'),
@@ -471,15 +477,22 @@ def countIngredientDuplicatesInShoppingList(account,ingredient_id,week,year):
 
 def generateShoppingList(account, week, year):
     recipes = RecipeWeek.objects.filter(account=account,week=week,year=year).values('recipe').order_by('id')
-    allIngredients = list()
+    ingredientsFresh = list()
+    ingredientsPantry = list()
     recipeIngIds = list()
     for recipe in recipes:
-        ingredients = RecipeIngredient.objects.filter(recipe__accountrecipe__account=account,ingredient__accountingredient__account=account,recipe=recipe['recipe']).values('id','recipe','ingredient','ingredient__name','ingredient__accountingredient__cost','ingredient__accountingredient__fresh','ingredient__accountingredient__category','quantity','quantity4','quantityMeasure')
-        allIngredients = allIngredients + list(ingredients)
-        for ing in ingredients:
+        thisRecipeFresh = list(RecipeIngredient.objects.filter(recipe__accountrecipe__account=account,ingredient__accountingredient__account=account,recipe=recipe['recipe'],ingredient__accountingredient__fresh=True).values('id','recipe','ingredient','ingredient__name','ingredient__accountingredient__cost','ingredient__accountingredient__fresh','ingredient__accountingredient__supermarketCategory','ingredient__accountingredient__pantryCategory','quantity','quantity4','quantityMeasure'))
+        thisRecipePantry = list(RecipeIngredient.objects.filter(recipe__accountrecipe__account=account,ingredient__accountingredient__account=account,recipe=recipe['recipe'],ingredient__accountingredient__fresh=False).values('id','recipe','ingredient','ingredient__name','ingredient__accountingredient__cost','ingredient__accountingredient__fresh','ingredient__accountingredient__supermarketCategory','ingredient__accountingredient__pantryCategory','quantity','quantity4','quantityMeasure'))
+        ingredientsFresh = ingredientsFresh + thisRecipeFresh
+        ingredientsPantry = ingredientsPantry + thisRecipePantry
+        for ing in thisRecipeFresh:
+            recipeIngIds.append(ing['id'])
+        for ing in thisRecipePantry:
             recipeIngIds.append(ing['id'])
 
-    allIngredients.sort(key=lambda x: (x['ingredient__accountingredient__fresh'], x['ingredient__accountingredient__category'], x['ingredient__name']))
+    ingredientsFresh.sort(key=lambda x: (x['ingredient__accountingredient__supermarketCategory'], x['ingredient__name']))
+    ingredientsPantry.sort(key=lambda x: (x['ingredient__accountingredient__pantryCategory'], x['ingredient__name']))
+    allIngredients = ingredientsFresh + ingredientsPantry
 
     # reconcile with the existing list
     # Delete ingredients which aren't in the new list

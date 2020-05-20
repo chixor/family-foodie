@@ -55,9 +55,16 @@ class SupermarketCategory(models.Model):
 	def __str__(self):
 		return self.name
 
+class PantryCategory(models.Model):
+	name = models.CharField(max_length=20, unique=True)
+
+	def __str__(self):
+		return self.name
+
 class Ingredient(models.Model):
 	name = models.CharField(max_length=64,unique=True)
-	category = models.ForeignKey(SupermarketCategory, blank=False, default=8, on_delete=models.PROTECT)
+	supermarketCategory = models.ForeignKey(SupermarketCategory, blank=False, default=8, on_delete=models.PROTECT)
+	pantryCategory = models.ForeignKey(PantryCategory, blank=False, default=8, on_delete=models.PROTECT)
 	fresh = models.BooleanField(default=False)
 	stockcode = models.IntegerField(null=True)
 	cost = models.FloatField(null=True)
@@ -74,7 +81,8 @@ class AccountRecipe(models.Model):
 class AccountIngredient(models.Model):
 	account = models.ForeignKey(Account, blank=False, null=False, on_delete=models.PROTECT)
 	ingredient = models.ForeignKey(Ingredient, blank=False, null=False, on_delete=models.PROTECT)
-	category = models.ForeignKey(SupermarketCategory, blank=False, default=8, on_delete=models.PROTECT)
+	supermarketCategory = models.ForeignKey(SupermarketCategory, blank=False, default=8, on_delete=models.PROTECT)
+	pantryCategory = models.ForeignKey(PantryCategory, blank=False, default=8, on_delete=models.PROTECT)
 	fresh = models.BooleanField(default=False)
 	stockcode = models.IntegerField(null=True)
 	cost = models.FloatField(null=True)

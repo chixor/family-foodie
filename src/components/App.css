@@ -45,6 +45,7 @@
   border: 5px dashed rgba(0, 0, 0, 0.1); }
 
 .corner-triangle-left, .corner-triangle-right {
+  background: transparent;
   cursor: pointer;
   display: block;
   width: 90px;

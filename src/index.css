@@ -53,6 +53,25 @@ h4.shopping-week {
 .supermarket-category-dairy {
   border-color: #64b2fb;
 }
+.pantry-category-pantry {
+  border-color: #bbb;
+}
+.pantry-category-kitchen-cupboard {
+  border-color: #ccc;
+}
+.pantry-category-fridge {
+  border-color: #95cddb;
+}
+.pantry-category-freezer {
+  border-color: #95cddb;
+}
+.pantry-category-breezeway-cupboard {
+  border-color: #ddd;
+}
+.pantry-category-garden {
+  border-color: #13a40b;
+}
+
 
 *[draggable="true"] {
   cursor: grab;

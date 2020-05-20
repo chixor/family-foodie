@@ -1,12 +1,10 @@
 {
   "extends": [
-    "plugin:flowtype/recommended",
     "airbnb",
     "prettier",
     "prettier/react"
   ],
   "plugins": [
-    "flowtype",
     "prettier"
   ],
   "parser": "babel-eslint",
@@ -27,6 +25,13 @@
   },
   "rules": {
     "no-unused-vars": 2,
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "react/prop-types": 0,
+    "react/jsx-props-no-spreading": 0,
+    "jsx-a11y/label-has-associated-control": [ 2, {
+      "required": {
+        "some": [ "nesting", "id" ]
+      }
+    }]
   }
 }

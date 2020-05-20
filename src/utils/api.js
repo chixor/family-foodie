@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { NotificationManager } from 'react-notifications'
-var BASEURL = '/api'
+
+const BASEURL = '/api'
 
 axios.defaults.xsrfCookieName = 'csrftoken'
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
@@ -16,245 +17,227 @@ function handleError(error) {
 }
 
 export default {
-    getUser: function() {
-      return axios
-          .get(`${BASEURL}/user/`)
-          .then(function(response) {
-              return response.data.result
-          })
-          .catch(handleError)
+    getUser() {
+        return axios
+            .get(`${BASEURL}/user/`)
+            .then((response) => response.data.result)
+            .catch(handleError)
     },
 
-    getMyRecipes: function() {
+    getMyRecipes() {
         return axios
             .get(`${BASEURL}/myrecipes/`)
-            .then(function(response) {
-                return response.data.result
-            })
+            .then((response) => response.data.result)
             .catch(handleError)
     },
 
-    getRecipes: function() {
+    getRecipes() {
         return axios
             .get(`${BASEURL}/recipes/`)
-            .then(function(response) {
-                return response.data
-            })
+            .then((response) => response.data)
             .catch(handleError)
     },
 
-    getRecipe: function(id) {
+    getRecipe(id) {
         return axios
             .get(`${BASEURL}/recipe/${id}`)
-            .then(function(response) {
-                return response.data.result[0]
-            })
+            .then((response) => response.data.result[0])
             .catch(handleError)
     },
 
-    getRecipeIngredients: function(id) {
+    getRecipeIngredients(id) {
         return axios
             .get(`${BASEURL}/recipe/${id}/ingredients`)
-            .then(function(response) {
-                return response.data.result
-            })
+            .then((response) => response.data.result)
             .catch(handleError)
     },
 
-    saveRecipe: function(id, details, ingredients, deleteIngredients) {
-        if(id) {
+    saveRecipe(id, details, ingredients, deleteIngredients) {
+        if (id) {
             return axios
                 .put(`${BASEURL}/recipe/${id}`, { data: { details, ingredients, deleteIngredients } })
-                .then(function(response) {
-                    NotificationManager.success('Recipe saved successfully')
-                    return response.data.id
-                })
-                .catch(handleError)
-        } else {
-            return axios
-                .post(`${BASEURL}/recipe/`, { data: { details, ingredients } })
-                .then(function(response) {
+                .then((response) => {
                     NotificationManager.success('Recipe saved successfully')
                     return response.data.id
                 })
                 .catch(handleError)
         }
+        return axios
+            .post(`${BASEURL}/recipe/`, { data: { details, ingredients } })
+            .then((response) => {
+                NotificationManager.success('Recipe saved successfully')
+                return response.data.id
+            })
+            .catch(handleError)
     },
 
-    saveRecipeIngredients: function(id, ingredients) {
+    saveRecipeIngredients(id, ingredients) {
         return axios
-            .put(`${BASEURL}/recipe/${id}/ingredients/`, { data: { ingredients: ingredients } })
-            .then(function(response) {
+            .put(`${BASEURL}/recipe/${id}/ingredients/`, { data: { ingredients } })
+            .then((response) => {
                 NotificationManager.success('Recipe ingredients saved successfully')
                 return response.data.result
             })
             .catch(handleError)
     },
 
-    saveIngredient: function(id, ingredient) {
+    saveIngredient(id, ingredient) {
         return axios
             .put(`${BASEURL}/ingredient/${id}`, { data: { ingredient } })
-            .then(function(response) {
+            .then((response) => {
                 NotificationManager.success('Ingredient saved successfully')
                 return response.data.result
             })
             .catch(handleError)
     },
 
-    deleteRecipe: function(id) {
-      return axios
-          .delete(`${BASEURL}/recipe/${id}`, { data: { action: 'delete' } })
-          .then(function(response) {
-              NotificationManager.success('Recipe deleted successfully')
-              return response.data.result
-          })
-          .catch(handleError)
+    deleteRecipe(id) {
+        return axios
+            .delete(`${BASEURL}/recipe/${id}`, { data: { action: 'delete' } })
+            .then((response) => {
+                NotificationManager.success('Recipe deleted successfully')
+                return response.data.result
+            })
+            .catch(handleError)
     },
 
-    archiveRecipe: function(id) {
-      return axios
-          .delete(`${BASEURL}/recipe/${id}`, { data: { action: 'archive' } })
-          .then(function(response) {
-              NotificationManager.success('Recipe archived successfully')
-              return response.data.result
-          })
-          .catch(handleError)
+    archiveRecipe(id) {
+        return axios
+            .delete(`${BASEURL}/recipe/${id}`, { data: { action: 'archive' } })
+            .then((response) => {
+                NotificationManager.success('Recipe archived successfully')
+                return response.data.result
+            })
+            .catch(handleError)
     },
 
-    unarchiveRecipe: function(id) {
-      return axios
-          .delete(`${BASEURL}/recipe/${id}`, { data: { action: 'unarchive' } })
-          .then(function(response) {
-              NotificationManager.success('Recipe unarchived successfully')
-              return response.data.result
-          })
-          .catch(handleError)
+    unarchiveRecipe(id) {
+        return axios
+            .delete(`${BASEURL}/recipe/${id}`, { data: { action: 'unarchive' } })
+            .then((response) => {
+                NotificationManager.success('Recipe unarchived successfully')
+                return response.data.result
+            })
+            .catch(handleError)
     },
 
-    getMeasurements: function() {
+    getMeasurements() {
         return axios
             .get(`${BASEURL}/measurements/`)
-            .then(function(response) {
-                return response.data.result
-            })
+            .then((response) => response.data.result)
             .catch(handleError)
     },
 
-    getCategories: function() {
+    getSupermarketCategories() {
         return axios
-            .get(`${BASEURL}/categories/`)
-            .then(function(response) {
-                return response.data.result
-            })
+            .get(`${BASEURL}/supermarketcategories/`)
+            .then((response) => response.data.result)
             .catch(handleError)
     },
 
-    getIngredients: function() {
+    getPantryCategories() {
+        return axios
+            .get(`${BASEURL}/pantrycategories/`)
+            .then((response) => response.data.result)
+            .catch(handleError)
+    },
+
+    getIngredients() {
         return axios
             .get(`${BASEURL}/ingredients/`)
-            .then(function(response) {
-                return response.data.result
-            })
+            .then((response) => response.data.result)
             .catch(handleError)
     },
 
-    getWeeks: function() {
+    getWeeks() {
         return axios
             .get(`${BASEURL}/weeks/`)
-            .then(function(response) {
-                return response.data.result
-            })
+            .then((response) => response.data.result)
             .catch(handleError)
     },
 
-    saveWeek: function(week) {
-        let recipe_ids = week.recipes.map((recipe, index) => {
+    saveWeek(week) {
+        const recipeIds = week.recipes.map((recipe) => {
             return { id: recipe.id, cost: recipe.cost }
         })
         return axios
-            .put(`${BASEURL}/week/${week.year}/${week.week}/`, { data: { recipes: recipe_ids } })
-            .then(function(response) {
+            .put(`${BASEURL}/week/${week.year}/${week.week}/`, { data: { recipes: recipeIds } })
+            .then((response) => {
                 NotificationManager.success(`Saved week ${week.week}, ${week.year}`)
                 return response.data.result
             })
             .catch(handleError)
     },
 
-    deleteWeek: function(week) {
+    deleteWeek(week) {
         return axios
             .delete(`${BASEURL}/week/${week.year}/${week.week}/`)
-            .then(function(response) {
+            .then((response) => {
                 NotificationManager.success(`Deleted week ${week.week}, ${week.year}`)
                 return response.data.result
             })
             .catch(handleError)
     },
 
-    shoppingListWeek: function(week) {
+    shoppingListWeek(week) {
         return axios
             .get(`${BASEURL}/shopping/${week.year}/${week.week}/`)
-            .then(function(response) {
-                return response.data.result
-            })
+            .then((response) => response.data.result)
             .catch(handleError)
     },
 
-    saveShoppingList: function(week, ingredients) {
+    saveShoppingList(week, ingredients) {
         return axios
-            .put(`${BASEURL}/shopping/${week.year}/${week.week}/`, { data: { ingredients: ingredients } })
-            .then(function(response) {
+            .put(`${BASEURL}/shopping/${week.year}/${week.week}/`, { data: { ingredients } })
+            .then((response) => {
                 NotificationManager.success('Saved')
                 return response.data.result
             })
             .catch(handleError)
     },
 
-    addShoppingListItem: function(week, name) {
+    addShoppingListItem(week, name) {
         return axios
-            .post(`${BASEURL}/shopping/${week.year}/${week.week}/`, { data: { name: name } })
-            .then(function(response) {
+            .post(`${BASEURL}/shopping/${week.year}/${week.week}/`, { data: { name } })
+            .then((response) => {
                 NotificationManager.success('Item added successfully')
                 return response.data.id
             })
             .catch(handleError)
     },
 
-    deleteShoppingListItem: function(week, id) {
+    deleteShoppingListItem(week, id) {
         return axios
-            .delete(`${BASEURL}/shopping/${week.year}/${week.week}/`, { data: { id: id } })
-            .then(function(response) {
+            .delete(`${BASEURL}/shopping/${week.year}/${week.week}/`, { data: { id } })
+            .then((response) => {
                 NotificationManager.success('Item deleted successfully')
                 return response.data.result
             })
             .catch(handleError)
     },
 
-    resetShoppingList: function(week) {
+    resetShoppingList(week) {
         return axios
             .delete(`${BASEURL}/shopping/${week.year}/${week.week}/`, { data: { reset: true } })
             .catch(handleError)
     },
 
-    purchaseShoppingListItem: function(week, id, ingredient_id, purchased) {
+    purchaseShoppingListItem(week, id, ingredientId, purchased) {
         return axios
             .put(`${BASEURL}/shopping/${week.year}/${week.week}/`, {
-                data: { id: id, ingredient_id: ingredient_id, purchased: purchased }
+                data: { id, ingredient_id: ingredientId, purchased },
             })
-            .then(function(response) {
-                return response.data.result
-            })
+            .then((response) => response.data.result)
             .catch(handleError)
     },
 
-    checkAvailability: function(ingredients) {
+    checkAvailability(ingredients) {
         const list = ingredients.reduce((a, b) => {
-            return b.stockcode ? { stockcode: a.stockcode + ',' + b.stockcode } : { stockcode: a.stockcode }
+            return b.stockcode ? { stockcode: `${a.stockcode},${b.stockcode}` } : { stockcode: a.stockcode }
         })
         return axios
             .get(`https://www.woolworths.com.au/apis/ui/products/${list.stockcode}`)
-            .then(function(response) {
-                return response.data
-            })
+            .then((response) => response.data)
             .catch(handleError)
-    }
+    },
 }
