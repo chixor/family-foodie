@@ -43,6 +43,7 @@ vim settings.py
 Run Django:
 
 ```
+cd family-foodie/
 source env/bin/activate
 cd api/
 python3 manage.py runserver
@@ -56,8 +57,11 @@ Other useful commands:
 ./manage.py migrate
 ```
 
+**Deployment steps provided in `DEPLOYMENT.md`**
+
+
 Tested in versions:
-* Python 2.7.10
+* Python 3.6
 * Django 2.0.1
 
 
