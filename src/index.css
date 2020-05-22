@@ -21,6 +21,9 @@ h4.shopping-week {
   font-family: Georgia, sans;
 }
 
+.draggable {
+  background-color: #fff;
+}
 .supermarket-category {
   border-left: 5px solid white;
   padding-left: 7px !important;

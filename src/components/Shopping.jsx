@@ -332,7 +332,7 @@ export default class Shopping extends Component {
                           key={`ingredient-${r.ingredient}-${r.id}`}
                         >
                           <td
-                            className={`supermarket-category supermarket-category-${
+                            className={`draggable supermarket-category supermarket-category-${
                               r.supermarketCategory
                                 ? r.supermarketCategory
                                     .replace(" & ", "")
@@ -460,7 +460,7 @@ export default class Shopping extends Component {
                           key={`ingredient-${r.ingredient}-${r.id}`}
                         >
                           <td
-                            className={`supermarket-category pantry-category-${r.pantryCategory.replace(
+                            className={`draggable supermarket-category pantry-category-${r.pantryCategory.replace(
                               " ",
                               "-"
                             )}`}
