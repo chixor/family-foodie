@@ -92,6 +92,7 @@ export default class Shopping extends Component {
   };
 
   dragStart = (ingredient, fromList, fromIndex) => {
+    document.body.style.overflow = "hidden";
     this.setState({ drag: { ingredient, fromList, fromIndex } });
   };
 
@@ -116,6 +117,7 @@ export default class Shopping extends Component {
   };
 
   drop = () => {
+    document.body.style.overflow = "auto";
     const { drag, ingredients } = this.state;
     let { cost } = this.state;
 
