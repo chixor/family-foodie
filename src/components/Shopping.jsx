@@ -307,7 +307,7 @@ export default class Shopping extends Component {
               >
                 <tbody>
                   <tr>
-                    <th colSpan="2">Ingredients</th>
+                    <th>Ingredients</th>
                     <th className="ingredient-quantity">2p</th>
                     <th colSpan="3" className="ingredient-price">
                       Price&nbsp;
@@ -329,27 +329,30 @@ export default class Shopping extends Component {
                           className={`${r.purchased ? "checked" : ""} ${
                             r.dragover ? "dragover" : ""
                           } ${r.isPurchasable ? "can-purchase" : ""}`}
-                          draggable="true"
-                          onDragStart={() => this.dragStart(r, "fresh", i)}
-                          onDragEnter={(e) => this.dragEnterRow(e, "fresh", i)}
                           key={`ingredient-${r.ingredient}-${r.id}`}
                         >
                           <td
-                            className={`table-column-tiny supermarket-category supermarket-category-${
+                            className={`supermarket-category supermarket-category-${
                               r.supermarketCategory
                                 ? r.supermarketCategory
                                     .replace(" & ", "")
                                     .replace(" ", "-")
                                 : ""
                             }`}
+                            draggable="true"
+                            onDragStart={() => this.dragStart(r, "fresh", i)}
+                            onDragEnter={(e) =>
+                              this.dragEnterRow(e, "fresh", i)
+                            }
                           >
                             <input
                               onChange={() => this.purchase(i)}
                               type="checkbox"
                               checked={r.purchased}
                             />
+                            &nbsp;&nbsp;
+                            {r.name || r.ingredient}
                           </td>
-                          <td>{r.name || r.ingredient}</td>
                           <td className="ingredient-quantity">
                             {this.roundToTwo(r.quantity)} {r.quantityMeasure}
                             {parseFloat(r.quantity) > 1 ? "s" : null}
@@ -454,9 +457,6 @@ export default class Shopping extends Component {
                       return (
                         <tr
                           className={r.dragover ? "dragover" : ""}
-                          draggable="true"
-                          onDragStart={() => this.dragStart(r, "pantry", i)}
-                          onDragEnter={(e) => this.dragEnterRow(e, "pantry", i)}
                           key={`ingredient-${r.ingredient}-${r.id}`}
                         >
                           <td
@@ -464,6 +464,11 @@ export default class Shopping extends Component {
                               " ",
                               "-"
                             )}`}
+                            draggable="true"
+                            onDragStart={() => this.dragStart(r, "pantry", i)}
+                            onDragEnter={(e) =>
+                              this.dragEnterRow(e, "pantry", i)
+                            }
                           >
                             {r.ingredient}
                           </td>
