@@ -1,7 +1,13 @@
 import React, { Component } from "react";
 import { NotificationManager } from "react-notifications";
+import { polyfill } from "mobile-drag-drop";
+import { scrollBehaviourDragImageTranslateOverride } from "mobile-drag-drop/scroll-behaviour";
 import api from "../utils/api";
 import MenuDate from "../utils/MenuDate";
+
+polyfill({
+  dragImageTranslateOverride: scrollBehaviourDragImageTranslateOverride,
+});
 
 const ENTER_KEY_CODE = 13;
 
@@ -93,7 +99,8 @@ export default class Shopping extends Component {
     e.preventDefault();
   };
 
-  dragEnterRow = (toList, toIndex) => {
+  dragEnterRow = (e, toList, toIndex) => {
+    e.preventDefault();
     const { drag, ingredients } = this.state;
     drag.toIndex = toIndex;
     drag.toList = toList;
@@ -322,7 +329,7 @@ export default class Shopping extends Component {
                           } ${r.isPurchasable ? "can-purchase" : ""}`}
                           draggable="true"
                           onDragStart={() => this.dragStart(r, "fresh", i)}
-                          onDragEnter={() => this.dragEnterRow("fresh", i)}
+                          onDragEnter={(e) => this.dragEnterRow(e, "fresh", i)}
                           key={`ingredient-${r.ingredient}-${r.id}`}
                         >
                           <td
@@ -447,7 +454,7 @@ export default class Shopping extends Component {
                           className={r.dragover ? "dragover" : ""}
                           draggable="true"
                           onDragStart={() => this.dragStart(r, "pantry", i)}
-                          onDragEnter={() => this.dragEnterRow("pantry", i)}
+                          onDragEnter={(e) => this.dragEnterRow(e, "pantry", i)}
                           key={`ingredient-${r.ingredient}-${r.id}`}
                         >
                           <td
