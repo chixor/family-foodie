@@ -3,6 +3,8 @@ import { NotificationManager } from "react-notifications";
 import api from "../utils/api";
 import MenuDate from "../utils/MenuDate";
 
+const ENTER_KEY_CODE = 13;
+
 export default class Shopping extends Component {
   constructor(props) {
     super(props);
@@ -139,8 +141,7 @@ export default class Shopping extends Component {
   };
 
   add = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
+    if (e.keyCode !== ENTER_KEY_CODE) return;
     const { ingredients } = this.state;
 
     api
@@ -410,16 +411,15 @@ export default class Shopping extends Component {
                     })}
                   <tr>
                     <td colSpan="5">
-                      <form onSubmit={this.add}>
-                        <input
-                          type="text"
-                          className="ingredient-input form-control"
-                          placeholder="add item..."
-                          ref="newIngredient"
-                          name="newIngredient"
-                          list="all-ingredients"
-                        />
-                      </form>
+                      <input
+                        type="text"
+                        className="ingredient-input form-control"
+                        placeholder="add item..."
+                        ref="newIngredient"
+                        name="newIngredient"
+                        list="all-ingredients"
+                        onKeyDown={this.add}
+                      />
                     </td>
                   </tr>
                 </tbody>

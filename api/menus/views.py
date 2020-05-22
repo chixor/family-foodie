@@ -475,9 +475,11 @@ def ShoppingLister(request, year, week):
         if AccountIngredient.objects.filter(account=account,ingredient__name=body['data']['name']).count() == 1:
             ingredient = AccountIngredient.objects.get(account=account,ingredient__name=body['data']['name'])
             result = ShoppingList.objects.create(account=account, week=week, year=year, fresh=True, name=body['data']['name'], cost=ingredient.cost, stockcode=ingredient.stockcode, supermarketCategory=ingredient.supermarketCategory, sort=sort, purchased=False)
+            category = result.supermarketCategory.name
         else:
             result = ShoppingList.objects.create(account=account, week=week, year=year, fresh=True, name=body['data']['name'], sort=sort, purchased=False)
-        return JsonResponse(dict(id=result.id,cost=result.cost,stockcode=result.stockcode,supermarketCategory=result.supermarketCategory.name))
+            category = None
+        return JsonResponse(dict(id=result.id,cost=result.cost,stockcode=result.stockcode,supermarketCategory=category))
 
     if request.method=='DELETE':
         body = json.loads(request.body.decode('utf-8'))
