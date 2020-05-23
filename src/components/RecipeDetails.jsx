@@ -218,7 +218,14 @@ export default class RecipeDetails extends Component {
                 </tr>
                 {recipeIngredients.map((r, i) => (
                   <tr key={`ingredient-display-table-${i}`}>
-                    <td>{r.ingredient}</td>
+                    <td
+                      className={`supermarket-category pantry-category-${r.pantryCategory.replace(
+                        " ",
+                        "-"
+                      )}`}
+                    >
+                      {r.ingredient}
+                    </td>
                     <td>
                       {r.quantity} {r.quantityMeasure}
                       {parseFloat(r.quantity, 10) > 1 ? "s" : null}

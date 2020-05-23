@@ -381,7 +381,7 @@ def RecipeAdd(request):
 def RecipeIngredientsList(request,pk):
     if request.method=='GET':
         account = AccountUser.objects.get(user=request.user).account
-        ingredients = RecipeIngredient.objects.filter(recipe=pk,recipe__accountrecipe__account=account).values('recipe','ingredient','quantity','quantity4','quantityMeasure','id')
+        ingredients = RecipeIngredient.objects.filter(recipe=pk,recipe__accountrecipe__account=account,ingredient__accountingredient__account=account).annotate(pantryCategory=F('ingredient__accountingredient__pantryCategory__name')).values('recipe','ingredient','quantity','quantity4','quantityMeasure','id','pantryCategory').order_by('ingredient__accountingredient__pantryCategory_id')
         for ing in ingredients:
             ing['quantityMeasure'] = Measure.objects.get(id=ing['quantityMeasure']).name
             ingobj = AccountIngredient.objects.filter(account=account,ingredient_id=ing['ingredient']).values('ingredient__name','fresh').first()
