@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import debounce from "lodash/debounce";
 import api from "../utils/api";
-import search from "../utils/search";
+import getUrlParameter from "../utils/Search";
 import RecipeCard from "../components/RecipeCard";
 
 export default class Recipes extends Component {
@@ -27,13 +27,9 @@ export default class Recipes extends Component {
   };
 
   load = () => {
-    const { location } = this.props;
     api.getRecipes().then((recipes) => {
       const { myRecipes, archiveRecipes } = recipes;
-      this.refs.searchQuery.value = search.getParameterByName(
-        "s",
-        location.search
-      );
+      this.refs.searchQuery.value = getUrlParameter("s");
       const showRecipes = this.search(this.refs.searchQuery.value, myRecipes);
       this.setState({ myRecipes, showRecipes, archiveRecipes });
     });
