@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import debounce from "lodash/debounce";
 import api from "../utils/api";
 import search from "../utils/search";
-import Recipe from "./Recipe";
+import RecipeCard from "../components/RecipeCard";
 
 export default class Recipes extends Component {
   constructor(props) {
@@ -132,7 +132,7 @@ export default class Recipes extends Component {
         </a>
         <p>{showRecipes.length} found</p>
         {showRecipes.map((r, i) => (
-          <Recipe
+          <RecipeCard
             key={`recipe-${r.id}`}
             index={i}
             editable={edit}
@@ -145,7 +145,7 @@ export default class Recipes extends Component {
         <p>These recipes won&apos;t appear in the planner.</p>
         <p>{archiveRecipes.length} found</p>
         {archiveRecipes.map((r, i) => (
-          <Recipe
+          <RecipeCard
             key={`recipe-${r.id}`}
             index={i}
             editable={edit}

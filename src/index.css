@@ -4,7 +4,6 @@ body {
 }
 h2 {
   font-size: 186%;
-  /*font-family: Georgia, sans;*/
 }
 h2 button {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -151,49 +150,10 @@ h4.shopping-week {
 .table > tbody > tr > th {
   padding: 6px 0;
 }
-.pricetag {
-  white-space: nowrap;
-  position: relative;
-  margin: 0 0 0 1.2em;
-  displaY: inline-block;
-  border-radius: 0 0.3em 0.3em 0;
-  padding: 0.25em 0.7em 0.2em 0.6em;
-  background: #5cb85c;
-  color: #fff;
-  line-height: 1;
-  top: -3px;
-  font-size: 65%;
-  font-family: "Nobel-RM", sans-serif;
-}
-.pricetag:before {
-  position: absolute;
-  content: "\25CF";
-  color: #fff;
-  font-size: 50%;
-  line-height: 0;
-  text-indent: 1.3em;
-  left: -1.4em;
-  top: 0;
-  width: 1px;
-  height: 0;
-  border-right: 1.4em solid #5cb85c;
-  border-top: 1.4em solid transparent;
-  border-bottom: 1.4em solid transparent;
-}
 .can-purchase {
   background: linear-gradient(to right, rgba(97,183,95,0.3) 0%, rgba(0,0,0,0) 80%);
 }
-.pricetag sup {
-  top: -.4em;
-  font-size: 60%;
-  padding-right: 0.2em;
-}
-.recipelist .pricetag {
-  position: absolute;
-  top: 253px;
-  right: 6px;
-  font-size: 80%;
-}
+
 .table-column-tiny {
   width: 1% !important;
 }
@@ -203,6 +163,7 @@ h4.shopping-week {
 .pad-left {
   padding-left: 6px !important;
 }
+
 .container-thisweek {
   background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.2) 0.5%,rgba(0,0,0,0.1) 40%);
   margin-bottom: 11pt;
@@ -231,8 +192,6 @@ h4.shopping-week {
   z-index: 99;
 }
 .container-archiveweek {
-  width: 33.333%;
-  float: left;
   font-size: 80%;
   text-align: left;
   padding: 8px 5px;
@@ -246,41 +205,18 @@ h4.shopping-week {
   margin-bottom: 8px;
   margin-left: -6px;
 }
-.container-archiveweek:nth-of-type(3n+1) {
-  clear: right;
-  padding-right: 0;
-}
-.container-archiveweek:nth-of-type(3n-1) {
-  clear: left;
-  padding-left: 0;
-}
 
-@media only screen and (max-width: 992px) {
-  .container-archiveweek:nth-of-type(3n+1) {
-    clear: none;
-    padding: 0 5px;
-  }
-  .container-archiveweek:nth-of-type(3n-1) {
-    clear: none;
-    padding: 0 5px;
-  }
-  .container-archiveweek:nth-of-type(2n) {
-    clear: right;
-    padding-right: 0;
-  }
-  .container-archiveweek:nth-of-type(2n-1) {
-    clear: left;
-    padding-left: 0;
-  }
-  .container-archiveweek {
-    width: 50%;
-  }
+/* grid layout on planner view */
+.planner-container {
+  display: grid;
+  grid-template-columns: auto auto auto;
 }
-
+.container-thisweek, .container-futureweek {
+  grid-column: 1 / span 3;
+}
 @media only screen and (max-width: 760px) {
   .container-archiveweek {
-    width: 100%;
-    clear: both;
+    grid-column: 1 / span 3;
     padding: 0 !important;
   }
   .planner-controls {
@@ -296,6 +232,8 @@ h4.shopping-week {
     margin-bottom: 20px;
   }
 }
+/* end grid layout */
+
 
 @media only screen and (min-width: 992px) {
   .col-md-6.shopping-list {

@@ -3,12 +3,12 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { NotificationContainer } from "react-notifications";
 import "react-notifications/lib/notifications.css";
 import "./App.css";
-import Nav from "./Nav";
-import Shopping from "./Shopping";
-import Planner from "./Planner";
-import Recipes from "./Recipes";
-import RecipeDetails from "./RecipeDetails";
-import Ingredients from "./Ingredients";
+import Nav from "./components/Nav";
+import Shopping from "./pages/Shopping";
+import Planner from "./pages/Planner";
+import Recipes from "./pages/Recipes";
+import RecipeDetails from "./pages/RecipeDetails";
+import Ingredients from "./pages/Ingredients";
 
 const App = () => (
   <BrowserRouter>

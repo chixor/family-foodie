@@ -44,72 +44,6 @@
 .weeklist.unsaved {
   border: 5px dashed rgba(0, 0, 0, 0.1); }
 
-.corner-triangle-left, .corner-triangle-right {
-  background: transparent;
-  cursor: pointer;
-  display: block;
-  width: 90px;
-  height: 90px;
-  border-style: solid;
-  border-width: 0 0 90px 90px;
-  border-color: transparent transparent transparent #222;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 99999;
-  color: white; }
-
-.corner-triangle-left .corner-triangle-text, .corner-triangle-right .corner-triangle-text {
-  position: relative;
-  top: 60px;
-  left: -90px;
-  transform: rotate(-45deg); }
-
-.corner-triangle-left .glyphicon, .corner-triangle-right .glyphicon {
-  position: absolute;
-  top: 15px;
-  left: -75px;
-  font-size: 180%; }
-
-.corner-triangle-right .glyphicon {
-  left: auto;
-  right: -75px; }
-
-.corner-triangle-right {
-  border-width: 0 90px 90px 0;
-  border-color: transparent #222 transparent transparent;
-  left: auto;
-  right: 0; }
-
-.corner-triangle-right .corner-triangle-text {
-  left: auto;
-  right: -50px;
-  top: 20px;
-  transform: rotate(45deg); }
-
-.container-archiveweek .corner-triangle-left,
-.container-archiveweek .corner-triangle-right {
-  border-width: 0 0 45px 45px;
-  width: 45px;
-  height: 45px;
-}
-
-.container-archiveweek .corner-triangle-right {
-  border-width: 0 45px 45px 0;
-}
-
-.container-archiveweek .corner-triangle-left .glyphicon,
-  .container-archiveweek .corner-triangle-right .glyphicon {
-  font-size: 120%;
-  top: 7px;
-  left: -38px;
-}
-
-.container-archiveweek .corner-triangle-right .glyphicon {
-  left: auto;
-  right: -38px;
-}
-
 .recipe-search {
   padding: 0; }
 
@@ -124,26 +58,6 @@
   max-height: 300px;
   overflow: scroll;
   border-bottom: 1px solid silver; }
-
-.recipe-search .search-results li {
-  list-style: none;
-  margin: 0;
-  border: 1px solid silver;
-  margin-top: -1px;
-  margin-bottom: -1px; }
-
-.recipe-search .search-results li:hover {
-  background-color: #eee; }
-
-.recipe-search .search-results img {
-  height: 56px;
-  float: left;
-  padding-right: 6pt; }
-
-.recipe-search .search-results span {
-  padding: 6pt;
-  height: 56px;
-  display: block; }
 
 .recipelist article, .recipedetail {
   background: white;
@@ -194,26 +108,6 @@
 .recipelist article button {
   float: right; }
 
-.recipelist article.recipeadd {
-  border: 5px dashed rgba(0, 0, 0, 0.1);
-  background-color: transparent;
-  box-shadow: none;
-  border-radius: 0;
-  position: relative;
-  cursor: pointer; }
-
-.recipelist article.recipeadd:before {
-  content: '+';
-  color: rgba(0, 0, 0, 0.1);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  font-size: 80px;
-  font-weight: bold;
-  line-height: 1;
-  margin-left: -24px;
-  margin-top: -40px; }
-
 .container-archiveweek .recipelist {
   margin: 0;
   border: 0;
@@ -227,13 +121,6 @@
   border-radius: 0;
 }
 
-.container-archiveweek .recipelist article.recipeadd {
-  height: 120px;
-}
-.container-archiveweek .recipelist article.recipeadd:before {
-  bottom: 5px;
-  top: auto;
-}
 .container-archiveweek .recipelist article .heroimage {
   height: 50px;
   width: 83px;
