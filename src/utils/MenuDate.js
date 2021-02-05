@@ -1,9 +1,18 @@
+const getDateOfISOWeek = (w, y) => {
+  const simple = new Date(y, 0, 1 + (w - 1) * 7);
+  const dow = simple.getDay();
+  const weekStart = simple;
+  if (dow <= 4) weekStart.setDate(simple.getDate() - simple.getDay() + 1);
+  else weekStart.setDate(simple.getDate() + 8 - simple.getDay());
+  return weekStart;
+};
+
 export default class MenuDate extends Date {
   constructor(year, week) {
     super();
     this.date =
       typeof year !== "undefined"
-        ? new Date(year, 0, 1 + (parseInt(week, 10) - 1) * 7)
+        ? getDateOfISOWeek(parseInt(week, 10), parseInt(year, 10))
         : new Date();
     return this;
   }
